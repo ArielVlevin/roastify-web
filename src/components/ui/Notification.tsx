@@ -14,7 +14,7 @@ const Notification: React.FC<NotificationProps> = ({
   notification,
   onClose,
   autoClose = true,
-  duration = 3000,
+  duration = 10000,
 }) => {
   useEffect(() => {
     if (autoClose && onClose) {

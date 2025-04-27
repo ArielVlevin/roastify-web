@@ -1,68 +1,224 @@
 // hooks/useRoaster.ts
-import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  RoastProfile,
-  TemperatureData,
-  NotificationType,
-  CrackStatus,
-  PROFILES,
-  FIRST_CRACK,
-  SECOND_CRACK,
-} from "@/lib/types";
+import { useEffect } from "react";
+import { PROFILES } from "@/lib/types";
 import * as api from "@/lib/api";
-import {
-  saveActiveRoast,
-  getActiveRoast,
-  clearActiveRoast,
-  updateActiveRoast,
-} from "@/lib/localStorageService";
+import { saveActiveRoast, getActiveRoast } from "@/lib/localStorageService";
 
-const MAX_DURATION = 15; // Maximum time in minutes
+// Import modular hooks
+import { useRoasterState } from "./useRoasterState";
+import { useTemperatureHandling } from "./useTemperatureHandling";
+import { useRoasterSync } from "./useRoasterSync";
+import { useRoasterControls } from "./useRoasterControls";
+import { useRoasterMonitoring } from "./useRoasterMonitoring";
+import { useRoasterSession } from "./useRoasterSession";
 
 export default function useRoaster() {
-  // State
-  const [isRoasting, setIsRoasting] = useState<boolean>(false);
-  const [time, setTime] = useState<number>(0);
-  const [heatLevel, setHeatLevel] = useState<number>(5);
-  const [selectedProfile, setSelectedProfile] = useState<RoastProfile>(
-    PROFILES[1]
-  ); // Default to Full City
-  const [temperature, setTemperature] = useState<number>(70); // Starting room temperature
-  const [temperatureData, setTemperatureData] = useState<TemperatureData[]>([]);
-  const [roastStage, setRoastStage] = useState<string>("Green");
-  const [crackStatus, setCrackStatus] = useState<CrackStatus>({
-    first: false,
-    second: false,
+  // Get all state from state hook
+  const state = useRoasterState();
+  const {
+    isRoasting,
+    setIsRoasting,
+    time,
+    setTime,
+    heatLevel,
+    setHeatLevel,
+    selectedProfile,
+    setSelectedProfile,
+    temperature,
+    setTemperature,
+    temperatureData,
+    setTemperatureData,
+    roastStage,
+    setRoastStage,
+    crackStatus,
+    setCrackStatus,
+    notification,
+    setNotification,
+    completed,
+    setCompleted,
+    firstCrackTime,
+    setFirstCrackTime,
+    secondCrackTime,
+    setSecondCrackTime,
+    hasRestoredSession,
+    setHasRestoredSession,
+    showRestorePrompt,
+    setShowRestorePrompt,
+    temperatureUnit,
+    setTempUnit,
+    fetchingRef,
+    intervalRef,
+    startTimeRef,
+    MAX_DURATION,
+  } = state;
+
+  // Temperature handling hooks
+  const {
+    toggleTemperatureUnit,
+    getDisplayTemperature,
+    formatTemperature,
+    formatTime,
+  } = useTemperatureHandling(temperatureUnit, setTempUnit);
+
+  // Server sync hooks
+  const { syncStateWithServer, checkForActiveRoast } = useRoasterSync({
+    isRoasting,
+    temperatureData,
+    startTimeRef,
+    crackStatus,
+    selectedProfile,
+    setShowRestorePrompt,
+    showRestorePrompt, // הוסף את המשתנה כאן
   });
-  const [notification, setNotification] = useState<NotificationType | null>(
-    null
-  );
-  const [completed, setCompleted] = useState<boolean>(false);
-  const [firstCrackTime, setFirstCrackTime] = useState<number | null>(null);
-  const [secondCrackTime, setSecondCrackTime] = useState<number | null>(null);
-  const [hasRestoredSession, setHasRestoredSession] = useState<boolean>(false);
-  const [showRestorePrompt, setShowRestorePrompt] = useState<boolean>(false);
 
-  // Refs
-  const fetchingRef = useRef<boolean>(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(0);
-
-  const syncStateWithServer = useCallback(async () => {
+  // Roast reset function - define it early because it's needed by other hooks
+  const resetRoast = async () => {
     try {
-      const serverState = await api.syncState({
-        is_roasting: isRoasting,
-        data: temperatureData,
-        start_time: startTimeRef.current,
-      });
+      await api.resetRoast();
 
-      console.log("State synchronized with server:", serverState);
-      return serverState;
+      // Check if server actually reset
+      const serverState = await api.getRoastStatus();
+
+      // If server still roasting or time not reset, try force reset
+      if (serverState.is_roasting || serverState.elapsed_time > 0) {
+        console.log("Server not properly reset, trying force reset");
+        await api.forceResetRoast();
+      }
+
+      setIsRoasting(false);
+      setTime(0);
+      setTemperature(70);
+      setTemperatureData([]);
+      setRoastStage("Green");
+      setCrackStatus({ first: false, second: false });
+      setFirstCrackTime(null);
+      setSecondCrackTime(null);
+      setCompleted(false);
+      setNotification(null);
+
+      // תיקון שימוש ב-&&
+      if (getActiveRoast()) {
+        saveActiveRoast({
+          startTime: 0,
+          lastUpdated: Date.now(),
+          temperatureData: [],
+          selectedProfileName: selectedProfile.name,
+          crackStatus: { first: false, second: false },
+          firstCrackTime: null,
+          secondCrackTime: null,
+          completed: false,
+        });
+      }
+
+      // Reset start time
+      startTimeRef.current = 0;
     } catch (error) {
-      console.error("Failed to sync state with server:", error);
-      return null;
+      console.error("Failed to reset roast process:", error);
+      setNotification({
+        type: "warning",
+        message: "Failed to reset roast process!",
+      });
     }
-  }, [isRoasting, temperatureData]);
+  };
+
+  // Control hooks
+  const { pauseRoast, startRoast } = useRoasterControls({
+    isRoasting,
+    setIsRoasting,
+    resetRoast,
+    temperatureData,
+    completed,
+    startTimeRef,
+    setTime,
+    setCompleted,
+    setCrackStatus,
+    setFirstCrackTime,
+    setSecondCrackTime,
+    setTemperatureData,
+    setNotification,
+    syncStateWithServer,
+    MAX_DURATION,
+  });
+
+  // Monitoring hooks
+  const { calculateOptimalHeatLevel } = useRoasterMonitoring({
+    isRoasting,
+    temperature,
+    setTemperature,
+    time,
+    setTime,
+    roastStage,
+    setRoastStage,
+    crackStatus,
+    setCrackStatus,
+    firstCrackTime,
+    setFirstCrackTime,
+    secondCrackTime,
+    setSecondCrackTime,
+    completed,
+    setCompleted,
+    temperatureData,
+    setTemperatureData,
+    notification,
+    setNotification,
+    fetchingRef,
+    intervalRef,
+    startTimeRef,
+    selectedProfile,
+    pauseRoast,
+    MAX_DURATION,
+  });
+
+  // Session hooks
+  const { restoreSession, declineRestore } = useRoasterSession({
+    setTemperatureData,
+    setSelectedProfile,
+    setCrackStatus,
+    setFirstCrackTime,
+    setSecondCrackTime,
+    setCompleted,
+    setTime,
+    setTemperature,
+    startTimeRef,
+    setIsRoasting,
+    setNotification,
+    setShowRestorePrompt,
+    resetRoast,
+    syncStateWithServer,
+    selectedProfile,
+    MAX_DURATION,
+  });
+
+  // Function to select a profile
+  const selectProfile = (profileName: string) => {
+    const profile = PROFILES.find((p) => p.name === profileName);
+    if (profile) {
+      setSelectedProfile(profile);
+    }
+  };
+
+  // Function to save roast data
+  const saveRoastData = async (name: string, notes: string = "") => {
+    try {
+      await api.saveRoast({
+        name,
+        profile: selectedProfile.name,
+        notes,
+      });
+      setNotification({
+        type: "success",
+        message: "Roast saved successfully!",
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to save roast:", error);
+      setNotification({
+        type: "warning",
+        message: "Failed to save roast!",
+      });
+      return false;
+    }
+  };
 
   // Load session from localStorage on initial mount
   useEffect(() => {
@@ -74,66 +230,47 @@ export default function useRoaster() {
     }
 
     setHasRestoredSession(true);
-  }, [hasRestoredSession]);
+  }, [hasRestoredSession, setHasRestoredSession, setShowRestorePrompt]);
 
-  // Restore previous session
-  const restoreSession = useCallback(async () => {
-    const activeRoast = getActiveRoast();
-    if (!activeRoast) return false;
-
-    try {
-      // First sync with server to resolve any conflicts
-      await syncStateWithServer();
-
-      // Restore data from localStorage
-      setTemperatureData(activeRoast.temperatureData);
-
-      // Find and set the selected profile
-      const profile =
-        PROFILES.find((p) => p.name === activeRoast.selectedProfileName) ||
-        PROFILES[1];
-      setSelectedProfile(profile);
-
-      // Restore other state
-      setCrackStatus(activeRoast.crackStatus);
-      setFirstCrackTime(activeRoast.firstCrackTime);
-      setSecondCrackTime(activeRoast.secondCrackTime);
-      setCompleted(activeRoast.completed);
-
-      // Calculate elapsed time
-      const elapsedTime = (Date.now() - activeRoast.startTime) / (1000 * 60); // in minutes
-      setTime(Math.min(elapsedTime, MAX_DURATION));
-
-      // Set current temperature from the last data point
-      if (activeRoast.temperatureData.length > 0) {
-        const lastPoint =
-          activeRoast.temperatureData[activeRoast.temperatureData.length - 1];
-        setTemperature(lastPoint.temperature);
-      }
-
-      startTimeRef.current = activeRoast.startTime;
-
-      // Don't automatically resume roasting, but update UI to reflect restored state
-      setIsRoasting(false);
-      setNotification({
-        type: "info",
-        message: "Previous roast session restored. Press Start to continue.",
-      });
-
-      setShowRestorePrompt(false);
-      return true;
-    } catch (error) {
-      console.error("Failed to restore session:", error);
-      clearActiveRoast();
-      return false;
+  // Check for active roast on the server after initial load
+  useEffect(() => {
+    if (hasRestoredSession) {
+      checkForActiveRoast();
     }
-  }, [syncStateWithServer]);
+  }, [hasRestoredSession, checkForActiveRoast]);
 
-  // Decline restoring previous session
-  const declineRestore = useCallback(() => {
-    clearActiveRoast();
-    setShowRestorePrompt(false);
-  }, []);
+  // Calculate and send optimal heat level based on temperature and profile
+  useEffect(() => {
+    if (!isRoasting) return;
+
+    const optimalHeatLevel = calculateOptimalHeatLevel(
+      temperature,
+      selectedProfile
+    );
+
+    // Only update if heat level needs to change
+    if (optimalHeatLevel !== heatLevel) {
+      setHeatLevel(optimalHeatLevel);
+
+      // Send to API
+      const updateHeatLevel = async () => {
+        try {
+          await api.setHeatLevel(optimalHeatLevel);
+        } catch (error) {
+          console.error("Failed to update heat level:", error);
+        }
+      };
+
+      updateHeatLevel();
+    }
+  }, [
+    isRoasting,
+    temperature,
+    selectedProfile,
+    heatLevel,
+    calculateOptimalHeatLevel,
+    setHeatLevel,
+  ]);
 
   // Periodically save session data to localStorage when roasting
   useEffect(() => {
@@ -161,6 +298,7 @@ export default function useRoaster() {
     firstCrackTime,
     secondCrackTime,
     completed,
+    startTimeRef,
   ]);
 
   // Save on page unload
@@ -190,247 +328,8 @@ export default function useRoaster() {
     firstCrackTime,
     secondCrackTime,
     completed,
+    startTimeRef,
   ]);
-
-  // Fetch temperature data from backend
-  useEffect(() => {
-    if (!isRoasting) {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      return;
-    }
-
-    const fetchTemperatureData = async () => {
-      if (fetchingRef.current) return; // Prevent multiple simultaneous requests
-
-      fetchingRef.current = true;
-
-      try {
-        // Get temperature
-        const tempData = await api.getTemperature();
-        setTemperature(tempData.temperature);
-
-        // Calculate elapsed time from start time
-        const elapsedTime = (Date.now() - startTimeRef.current) / (1000 * 60); // in minutes
-        setTime(elapsedTime);
-
-        // Add data point to chart
-        setTemperatureData((prevData) => [
-          ...prevData,
-          { time: elapsedTime, temperature: tempData.temperature },
-        ]);
-
-        // Check if maximum time reached
-        if (elapsedTime >= MAX_DURATION) {
-          await pauseRoast();
-          setNotification({
-            type: "warning",
-            message: "Maximum roast time reached!",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch temperature data:", error);
-        setNotification({
-          type: "warning",
-          message: "Failed to fetch temperature data!",
-        });
-      } finally {
-        fetchingRef.current = false;
-      }
-    };
-
-    // Initial fetch
-    fetchTemperatureData();
-
-    // Setup interval for regular updates
-    intervalRef.current = setInterval(fetchTemperatureData, 600);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [isRoasting]);
-
-  // Monitor roast stages
-  useEffect(() => {
-    // Update roast stage based on temperature
-    if (temperature < 200) {
-      setRoastStage("Green");
-    } else if (temperature < 300) {
-      setRoastStage("Yellow");
-    } else if (temperature < 350) {
-      setRoastStage("Light Brown");
-    } else if (temperature < 400) {
-      setRoastStage("Medium Brown");
-    } else if (temperature < 435) {
-      setRoastStage("Dark Brown");
-    } else {
-      setRoastStage("Nearly Black");
-    }
-
-    // First crack detection
-    if (
-      !crackStatus.first &&
-      temperature >= FIRST_CRACK.min &&
-      temperature <= FIRST_CRACK.max
-    ) {
-      setCrackStatus((prev) => ({ ...prev, first: true }));
-      setFirstCrackTime(time);
-      setNotification({ type: "info", message: "First crack detected!" });
-    }
-
-    // Second crack detection
-    if (
-      !crackStatus.second &&
-      temperature >= SECOND_CRACK.min &&
-      temperature <= SECOND_CRACK.max
-    ) {
-      setCrackStatus((prev) => ({ ...prev, second: true }));
-      setSecondCrackTime(time);
-      setNotification({ type: "info", message: "Second crack detected!" });
-    }
-
-    // Check if target profile is reached
-    if (
-      isRoasting &&
-      temperature >= selectedProfile.targetTemp &&
-      time >= selectedProfile.duration
-    ) {
-      pauseRoast();
-      setCompleted(true);
-      setNotification({
-        type: "success",
-        message: `${selectedProfile.name} roast completed successfully!`,
-      });
-
-      // Also save this state
-      updateActiveRoast({ completed: true });
-    }
-  }, [temperature, isRoasting, time, crackStatus, selectedProfile]);
-
-  // Calculate and send optimal heat level based on temperature and profile
-  useEffect(() => {
-    if (!isRoasting) return;
-
-    // Determine heat level based on temperature and profile
-    const calculateOptimalHeatLevel = () => {
-      const targetTemp = selectedProfile.targetTemp;
-      const tempDifference = targetTemp - temperature;
-
-      // Linear scale: higher heat when far from target, lower when close
-      if (tempDifference > 150) return 10;
-      if (tempDifference > 100) return 8;
-      if (tempDifference > 50) return 6;
-      if (tempDifference > 20) return 5;
-      if (tempDifference > 0) return 4;
-
-      // Maintain temperature when at target
-      return 3;
-    };
-
-    const optimalHeatLevel = calculateOptimalHeatLevel();
-
-    // Only update if heat level needs to change
-    if (optimalHeatLevel !== heatLevel) {
-      setHeatLevel(optimalHeatLevel);
-
-      // Send to API
-      const updateHeatLevel = async () => {
-        try {
-          await api.setHeatLevel(optimalHeatLevel);
-        } catch (error) {
-          console.error("Failed to update heat level:", error);
-        }
-      };
-
-      updateHeatLevel();
-    }
-  }, [isRoasting, temperature, selectedProfile, heatLevel]);
-
-  // Clear notification after 3 seconds
-  useEffect(() => {
-    if (!notification) return;
-
-    const timer = setTimeout(() => {
-      setNotification(null);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [notification]);
-
-  // Starting a fresh roast session
-  const startRoast = useCallback(async () => {
-    try {
-      // First try to sync with server
-      await syncStateWithServer();
-
-      // If continuing a previous session, use the existing startTime
-      if (temperatureData.length > 0 && !completed) {
-        // We are continuing a paused session
-        try {
-          await api.startRoast();
-          setIsRoasting(true);
-          return;
-        } catch (resumeError) {
-          // If we get an error (400) trying to resume, we'll try resetting and starting fresh
-          console.log(
-            "Error trying to resume, attempting reset and restart..."
-          );
-          await api.resetRoast();
-          await api.startRoast();
-          setIsRoasting(true);
-          return;
-        }
-      }
-
-      // Starting a fresh roast session
-      await api.startRoast();
-      setIsRoasting(true);
-      setCompleted(false);
-      setCrackStatus({ first: false, second: false });
-      setFirstCrackTime(null);
-      setSecondCrackTime(null);
-      setTemperatureData([]);
-
-      // Store the start time
-      startTimeRef.current = Date.now();
-      setTime(0);
-
-      // Clear any previous roast data
-      clearActiveRoast();
-    } catch (error) {
-      console.error("Failed to start roast process:", error);
-
-      // Check if error is due to roast already in progress
-      if (error instanceof Error && error.message.includes("400")) {
-        // Try to force reset and start again
-        try {
-          await api.resetRoast();
-          // Try starting again after reset
-          await api.startRoast();
-          setIsRoasting(true);
-          setNotification({
-            type: "info",
-            message: "Restart successful after reset",
-          });
-        } catch (resetError) {
-          setNotification({
-            type: "warning",
-            message: "Could not start roast. Try refreshing the page.",
-          });
-        }
-      } else {
-        setNotification({
-          type: "warning",
-          message: "Failed to start roast process!",
-        });
-      }
-    }
-  }, [syncStateWithServer, completed, temperatureData.length]);
 
   // Sync with server on initial mount
   useEffect(() => {
@@ -448,82 +347,14 @@ export default function useRoaster() {
     }
   }, [syncStateWithServer, hasRestoredSession]);
 
-  const pauseRoast = useCallback(async () => {
-    try {
-      await api.pauseRoast();
-      setIsRoasting(false);
-    } catch (error) {
-      console.error("Failed to pause roast process:", error);
-      setNotification({
-        type: "warning",
-        message: "Failed to pause roast process!",
-      });
-    }
-  }, []);
-
-  const resetRoast = useCallback(async () => {
-    try {
-      await api.resetRoast();
-      setIsRoasting(false);
-      setTime(0);
-      setTemperature(70);
-      setTemperatureData([]);
-      setRoastStage("Green");
-      setCrackStatus({ first: false, second: false });
-      setFirstCrackTime(null);
-      setSecondCrackTime(null);
-      setCompleted(false);
-      setNotification(null);
-      clearActiveRoast();
-    } catch (error) {
-      console.error("Failed to reset roast process:", error);
-      setNotification({
-        type: "warning",
-        message: "Failed to reset roast process!",
-      });
-    }
-  }, []);
-
-  const selectProfile = useCallback((profileName: string) => {
-    const profile = PROFILES.find((p) => p.name === profileName);
-    if (profile) {
-      setSelectedProfile(profile);
-    }
-  }, []);
-
-  const saveRoastData = useCallback(
-    async (name: string, notes: string = "") => {
-      try {
-        await api.saveRoast({
-          name,
-          profile: selectedProfile.name,
-          notes,
-        });
-        setNotification({
-          type: "success",
-          message: "Roast saved successfully!",
-        });
-
-        // Clear active roast after successful save
-        clearActiveRoast();
-        return true;
-      } catch (error) {
-        console.error("Failed to save roast:", error);
-        setNotification({ type: "warning", message: "Failed to save roast!" });
-        return false;
-      }
-    },
-    [selectedProfile.name]
-  );
-
   return {
     // State
     isRoasting,
     time,
     heatLevel,
     selectedProfile,
-    temperature,
-    temperatureData,
+    temperature, // Always in Fahrenheit internally
+    temperatureData, // Always in Fahrenheit internally
     roastStage,
     crackStatus,
     notification,
@@ -531,6 +362,12 @@ export default function useRoaster() {
     firstCrackTime,
     secondCrackTime,
     showRestorePrompt,
+    temperatureUnit,
+
+    // Temperature handling
+    getDisplayTemperature,
+    formatTemperature,
+    toggleTemperatureUnit,
 
     // Actions
     startRoast,
@@ -541,6 +378,7 @@ export default function useRoaster() {
     restoreSession,
     declineRestore,
     syncStateWithServer,
+    formatTime,
 
     // Constants
     profiles: PROFILES,

@@ -1,4 +1,3 @@
-// components/roaster/RestoreSessionPrompt.tsx
 import React from "react";
 import { Clock, Check, X } from "lucide-react";
 

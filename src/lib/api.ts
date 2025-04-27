@@ -1,4 +1,4 @@
-// lib/api.ts - API client functions
+import { TemperatureData, CrackStatus } from "@/lib/types";
 
 // API URL - Change this to your Raspberry Pi address
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -121,6 +121,30 @@ export async function resetRoast() {
 }
 
 /**
+ * Force reset the roast process (for recovery scenarios)
+ */
+export async function forceResetRoast() {
+  try {
+    const response = await fetch(`${API_URL}/force-reset`, {
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      const error = new Error(
+        `Failed to force reset roast: ${response.status}`
+      ) as ApiError;
+      error.status = response.status;
+      throw error;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error force resetting roast:", error);
+    throw error;
+  }
+}
+
+/**
  * Set the heat level
  */
 export async function setHeatLevel(level: number) {
@@ -230,16 +254,25 @@ export async function getRoastLog(filename: string) {
  */
 export async function syncState(clientState: {
   is_roasting: boolean;
-  data: any[];
+  data: TemperatureData[];
   start_time: number;
+  crack_status?: CrackStatus;
 }) {
   try {
+    // Convert timestamps from JS milliseconds to Unix seconds for the server
+    const serverFormat = {
+      is_roasting: clientState.is_roasting,
+      data: clientState.data,
+      start_time: Math.floor(clientState.start_time / 1000), // Convert ms to seconds
+      crack_status: clientState.crack_status || { first: false, second: false },
+    };
+
     const response = await fetch(`${API_URL}/sync-state`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(clientState),
+      body: JSON.stringify(serverFormat),
     });
 
     if (!response.ok) {
@@ -253,6 +286,24 @@ export async function syncState(clientState: {
     return await response.json();
   } catch (error) {
     console.error("Error syncing state:", error);
+    throw error;
+  }
+}
+
+/**
+ * Check if there's an active roast on the server
+ * This is used when loading the page to see if we should restore a session
+ */
+export async function checkActiveRoast() {
+  try {
+    // Send a minimal sync request to get server state
+    return await syncState({
+      is_roasting: false,
+      data: [],
+      start_time: 0,
+    });
+  } catch (error) {
+    console.error("Error checking for active roast:", error);
     throw error;
   }
 }

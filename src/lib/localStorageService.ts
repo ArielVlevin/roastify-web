@@ -105,3 +105,18 @@ export const updateActiveRoast = (
     console.error("Failed to update active roast:", error);
   }
 };
+
+export function getTemperatureUnit(): "F" | "C" {
+  // בדיקה אם הדפדפן תומך באחסון מקומי
+  if (typeof window === "undefined" || !window.localStorage) return "F"; // ברירת מחדל במקרה של בעיה
+
+  const unit = localStorage.getItem("temperatureUnit");
+  return unit === "C" ? "C" : "F"; // החזר 'F' אם אין ערך או אם הערך שגוי
+}
+
+export function setTemperatureUnit(unit: "F" | "C"): void {
+  // בדיקה אם הדפדפן תומך באחסון מקומי
+  if (typeof window === "undefined" || !window.localStorage) return;
+
+  localStorage.setItem("temperatureUnit", unit);
+}

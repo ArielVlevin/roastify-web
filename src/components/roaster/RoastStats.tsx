@@ -12,6 +12,9 @@ interface RoastStatsProps {
   isRoasting: boolean;
   completed: boolean;
   notification: NotificationType | null;
+  temperatureUnit: "F" | "C";
+  formatTemperature: (tempF: number) => string;
+  formatTime: (timeInSeconds: number) => string;
 }
 
 const RoastStats: React.FC<RoastStatsProps> = ({
@@ -22,6 +25,8 @@ const RoastStats: React.FC<RoastStatsProps> = ({
   isRoasting,
   completed,
   notification,
+  formatTemperature,
+  formatTime,
 }) => {
   return (
     <div>
@@ -52,8 +57,8 @@ const RoastStats: React.FC<RoastStatsProps> = ({
 
       {/* Current Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <StatBox label="Time" value={`${time.toFixed(1)} min`} />
-        <StatBox label="Temperature" value={`${Math.round(temperature)}°F`} />
+        <StatBox label="Time" value={formatTime(time)} />
+        <StatBox label="Temperature" value={formatTemperature(temperature)} />
         <StatBox label="Roast Stage" value={roastStage} />
         <CrackStatusBox first={crackStatus.first} second={crackStatus.second} />
       </div>

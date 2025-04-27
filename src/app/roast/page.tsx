@@ -9,6 +9,8 @@ import SaveRoastForm from "@/components/roaster/SaveRoastForm";
 import RoastStats from "@/components/roaster/RoastStats";
 import { useRouter } from "next/navigation";
 import RestoreSessionPrompt from "@/components/roaster/RestoreSessionPrompt";
+import TemperatureUnitToggle from "@/components/ui/TemperatureUnitToggle";
+import { Button } from "@/components/ui/button";
 
 export default function RoastPage() {
   const router = useRouter();
@@ -31,11 +33,14 @@ export default function RoastPage() {
     selectProfile,
     saveRoastData,
     profiles,
-    firstCrackTime,
-    secondCrackTime,
     showRestorePrompt,
     restoreSession,
     declineRestore,
+    temperatureUnit,
+    toggleTemperatureUnit,
+    getDisplayTemperature,
+    formatTemperature,
+    formatTime,
   } = useRoaster();
 
   const handleSaveClick = () => {
@@ -79,16 +84,18 @@ export default function RoastPage() {
     <div className="flex flex-col min-h-screen bg-stone-100 p-4">
       <header className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-stone-800 flex items-center gap-2">
-          <Coffee size={32} /> Artisan Coffee Roaster
+          <Coffee size={32} /> <p></p>Coffee Roaster
         </h1>
 
-        <button
-          onClick={handleSaveClick}
-          disabled={temperatureData.length === 0}
-          className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Save size={16} /> Save Roast
-        </button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleSaveClick}
+            disabled={temperatureData.length === 0}
+            className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Save size={16} /> Save Roast
+          </Button>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -107,22 +114,27 @@ export default function RoastPage() {
 
         {/* Right Panel: Real-time Data */}
         <div className="bg-white p-4 rounded-lg shadow-md md:col-span-2">
+          <TemperatureUnitToggle
+            temperatureUnit={temperatureUnit}
+            toggleTemperatureUnit={toggleTemperatureUnit}
+            className="mr-2"
+          />
           {/* Target Info */}
           <h2 className="text-xl font-semibold text-stone-800">
             Target Profile
           </h2>
-          <div className="mt-4 p-3 bg-stone-50 rounded-lg border border-stone-200 mb-4  ">
+          <div className="mt-4 p-3 bg-stone-50 rounded-lg border border-stone-200 mb-4">
             <div className="flex justify-between text-sm">
               <div>
                 <span className="text-stone-500">Temperature:</span>
                 <span className="ml-2 font-medium text-stone-800">
-                  {selectedProfile.targetTemp}°F
+                  {formatTemperature(selectedProfile.targetTemp)}
                 </span>
               </div>
               <div>
                 <span className="text-stone-500">Duration:</span>
                 <span className="ml-2 font-medium text-stone-800">
-                  {selectedProfile.duration} min
+                  {formatTime(selectedProfile.duration * 60)}
                 </span>
               </div>
             </div>
@@ -135,6 +147,9 @@ export default function RoastPage() {
             isRoasting={isRoasting}
             completed={completed}
             notification={notification}
+            temperatureUnit={temperatureUnit}
+            formatTemperature={formatTemperature}
+            formatTime={formatTime}
           />
 
           {/* Temperature Chart */}
@@ -143,6 +158,8 @@ export default function RoastPage() {
               data={temperatureData}
               targetTemperature={selectedProfile.targetTemp}
               time={time}
+              temperatureUnit={temperatureUnit}
+              getDisplayTemperature={getDisplayTemperature}
             />
           </div>
         </div>

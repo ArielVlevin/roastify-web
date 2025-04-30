@@ -47,6 +47,15 @@ export interface RoastLog {
   secondCrack: number | null;
 }
 
+export interface RoastMarker {
+  id: string;
+  time: number;
+  temperature: number;
+  label: string;
+  color?: string;
+  notes?: string;
+}
+
 // Constants
 export const PROFILES: RoastProfile[] = [
   {

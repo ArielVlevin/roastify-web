@@ -1,12 +1,14 @@
+import type React from "react";
+
 interface StatBoxProps {
   label: string;
   value: string;
 }
 
-const StatBox: React.FC<StatBoxProps> = ({ label, value }) => (
-  <div className="bg-stone-100 p-3 rounded-lg">
-    <div className="text-sm text-stone-500">{label}</div>
-    <div className="text-xl font-bold text-stone-800">{value}</div>
+export const StatBox: React.FC<StatBoxProps> = ({ label, value }) => (
+  <div className="bg-muted/30 p-3 rounded-lg border border-border">
+    <div className="text-sm text-muted-foreground">{label}</div>
+    <div className="text-lg sm:text-xl font-bold text-foreground">{value}</div>
   </div>
 );
 
@@ -16,15 +18,21 @@ interface CrackStatusBoxProps {
   second: boolean;
 }
 
-const CrackStatusBox: React.FC<CrackStatusBoxProps> = ({ first, second }) => (
-  <div className="bg-stone-100 p-3 rounded-lg">
-    <div className="text-sm text-stone-500">Crack Status</div>
+export const CrackStatusBox: React.FC<CrackStatusBoxProps> = ({
+  first,
+  second,
+}) => (
+  <div className="bg-muted/30 p-3 rounded-lg border border-border">
+    <div className="text-sm text-muted-foreground">Crack Status</div>
     <div className="text-base font-bold">
-      <span className={first ? "text-amber-500" : "text-stone-400"}>1st</span>
-      {" / "}
-      <span className={second ? "text-red-600" : "text-stone-400"}>2nd</span>
+      <span className={first ? "text-accent" : "text-muted-foreground/60"}>
+        1st
+      </span>
+      <span
+        className={second ? "text-destructive" : "text-muted-foreground/60"}
+      >
+        2nd
+      </span>
     </div>
   </div>
 );
-
-export { StatBox, CrackStatusBox };

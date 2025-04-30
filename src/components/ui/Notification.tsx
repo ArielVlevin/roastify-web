@@ -2,6 +2,7 @@
 import React, { useEffect } from "react";
 import { AlertTriangle, Check, Info, X } from "lucide-react";
 import { NotificationType } from "@/lib/types";
+import { Button } from "./button";
 
 interface NotificationProps {
   notification: NotificationType;
@@ -63,13 +64,13 @@ const Notification: React.FC<NotificationProps> = ({
         <span>{notification.message}</span>
       </div>
       {onClose && (
-        <button
+        <Button
           onClick={onClose}
           className="text-current opacity-70 hover:opacity-100"
           aria-label="Close notification"
         >
           <X size={16} />
-        </button>
+        </Button>
       )}
     </div>
   );

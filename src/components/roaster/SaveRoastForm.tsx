@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+"use client";
+
+import type React from "react";
+import { useState } from "react";
 
 interface SaveRoastFormProps {
   profileName: string;
@@ -36,12 +39,12 @@ const SaveRoastForm: React.FC<SaveRoastFormProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
-        className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full"
+        className="bg-card rounded-lg shadow-lg p-5 sm:p-6 max-w-md w-full border border-border"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-semibold mb-4 text-stone-800">
+        <h2 className="text-xl font-semibold mb-4 text-foreground">
           Save Roast Data
         </h2>
 
@@ -49,7 +52,7 @@ const SaveRoastForm: React.FC<SaveRoastFormProps> = ({
           <div className="mb-4">
             <label
               htmlFor="roastName"
-              className="block text-sm font-medium text-stone-600 mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Roast Name
             </label>
@@ -58,7 +61,7 @@ const SaveRoastForm: React.FC<SaveRoastFormProps> = ({
               id="roastName"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 border border-stone-300 rounded-md"
+              className="w-full p-2 border border-input rounded-md bg-background text-foreground"
               placeholder="Enter a name for this roast"
               required
             />
@@ -67,7 +70,7 @@ const SaveRoastForm: React.FC<SaveRoastFormProps> = ({
           <div className="mb-6">
             <label
               htmlFor="roastNotes"
-              className="block text-sm font-medium text-stone-600 mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Notes (optional)
             </label>
@@ -75,7 +78,7 @@ const SaveRoastForm: React.FC<SaveRoastFormProps> = ({
               id="roastNotes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full p-2 border border-stone-300 rounded-md h-24"
+              className="w-full p-2 border border-input rounded-md h-24 bg-background text-foreground"
               placeholder="Add any notes about this roast"
             />
           </div>
@@ -84,14 +87,14 @@ const SaveRoastForm: React.FC<SaveRoastFormProps> = ({
             <button
               type="button"
               onClick={onCancel}
-              className="py-2 px-4 border border-stone-300 rounded-md hover:bg-stone-100"
+              className="py-2 px-4 border border-border rounded-md hover:bg-muted text-foreground"
               disabled={isSaving}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+              className="py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary-dark disabled:opacity-50"
               disabled={isSaving}
             >
               {isSaving ? "Saving..." : "Save Roast"}

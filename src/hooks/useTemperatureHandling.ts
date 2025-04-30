@@ -1,11 +1,32 @@
-// hooks/useTemperatureHandling.ts
-import { useCallback } from "react";
-import { setTemperatureUnit } from "@/lib/localStorageService";
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import {
+  setTemperatureUnit,
+  getTemperatureUnit,
+} from "@/lib/localStorageService";
 
 export function useTemperatureHandling(
-  temperatureUnit: "F" | "C",
+  initialUnit: "F" | "C",
   setTempUnit: (unit: "F" | "C") => void
 ) {
+  // Track if we're mounted on the client to safely use localStorage
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Initialize with server-side compatible default
+  useEffect(() => {
+    setIsMounted(true);
+
+    // Only load from localStorage on the client
+    if (typeof window !== "undefined") {
+      const savedUnit = getTemperatureUnit();
+      // Only update if different to avoid unnecessary re-renders
+      if (savedUnit !== initialUnit) {
+        setTempUnit(savedUnit);
+      }
+    }
+  }, [initialUnit, setTempUnit]);
+
   // Temperature conversion functions
   const fahrenheitToCelsius = useCallback((tempF: number): number => {
     return Math.round((((tempF - 32) * 5) / 9) * 10) / 10;
@@ -15,28 +36,34 @@ export function useTemperatureHandling(
     return Math.round(((tempC * 9) / 5 + 32) * 10) / 10;
   }, []);
 
-  // Toggle temperature unit
+  // Toggle temperature unit safely
   const toggleTemperatureUnit = useCallback(() => {
-    const newUnit = temperatureUnit === "F" ? "C" : "F";
+    if (!isMounted) return; // Don't execute during SSR
+
+    const newUnit = initialUnit === "F" ? "C" : "F";
     setTempUnit(newUnit);
-    setTemperatureUnit(newUnit);
-  }, [temperatureUnit, setTempUnit]);
+
+    // Only access localStorage on client
+    if (typeof window !== "undefined") {
+      setTemperatureUnit(newUnit);
+    }
+  }, [initialUnit, setTempUnit, isMounted]);
 
   // Get the displayed temperature
   const getDisplayTemperature = useCallback(
     (tempF: number): number => {
-      return temperatureUnit === "F" ? tempF : fahrenheitToCelsius(tempF);
+      return initialUnit === "F" ? tempF : fahrenheitToCelsius(tempF);
     },
-    [temperatureUnit, fahrenheitToCelsius]
+    [initialUnit, fahrenheitToCelsius]
   );
 
   // Format temperature with unit
   const formatTemperature = useCallback(
     (tempF: number): string => {
       const displayTemp = getDisplayTemperature(tempF);
-      return `${displayTemp} °${temperatureUnit}`;
+      return `${displayTemp} °${initialUnit}`;
     },
-    [getDisplayTemperature, temperatureUnit]
+    [getDisplayTemperature, initialUnit]
   );
 
   // Format time display - convert seconds to mm:ss format
@@ -55,5 +82,6 @@ export function useTemperatureHandling(
     getDisplayTemperature,
     formatTemperature,
     formatTime,
+    isMounted,
   };
 }

@@ -1,6 +1,6 @@
 // hooks/useRoaster.ts
-import { useEffect } from "react";
-import { PROFILES } from "@/lib/types";
+import { useCallback, useEffect } from "react";
+import { PROFILES, RoastMarker } from "@/lib/types";
 import * as api from "@/lib/api";
 import { saveActiveRoast, getActiveRoast } from "@/lib/localStorageService";
 
@@ -46,6 +46,8 @@ export default function useRoaster() {
     setShowRestorePrompt,
     temperatureUnit,
     setTempUnit,
+    markers,
+    setMarkers,
     fetchingRef,
     intervalRef,
     startTimeRef,
@@ -68,7 +70,7 @@ export default function useRoaster() {
     crackStatus,
     selectedProfile,
     setShowRestorePrompt,
-    showRestorePrompt, // הוסף את המשתנה כאן
+    showRestorePrompt,
   });
 
   // Roast reset function - define it early because it's needed by other hooks
@@ -95,8 +97,6 @@ export default function useRoaster() {
       setSecondCrackTime(null);
       setCompleted(false);
       setNotification(null);
-
-      // תיקון שימוש ב-&&
       if (getActiveRoast()) {
         saveActiveRoast({
           startTime: 0,
@@ -341,11 +341,102 @@ export default function useRoaster() {
       }
     };
 
-    // Only run once after first render
     if (hasRestoredSession) {
       initialSync();
     }
   }, [syncStateWithServer, hasRestoredSession]);
+
+  const addMarker = (
+    label: string,
+    color: string = "#333333",
+    notes: string = ""
+  ) => {
+    if (!isRoasting && temperatureData.length === 0) return;
+
+    const currentTemp = temperature;
+    const currentTime = time;
+
+    const id = `marker-${Date.now()}`;
+
+    const newMarker: RoastMarker = {
+      id,
+      time: currentTime,
+      temperature: currentTemp,
+      label,
+      notes,
+      color,
+    };
+
+    setMarkers((prev) => {
+      const updatedMarkers = [...prev, newMarker];
+      saveMarkersToLocalStorage(updatedMarkers);
+      return updatedMarkers;
+    });
+  };
+
+  const removeMarker = useCallback((markerId: string) => {
+    setMarkers((prev) => {
+      const updatedMarkers = prev.filter((marker) => marker.id !== markerId);
+      saveMarkersToLocalStorage(updatedMarkers);
+      return updatedMarkers;
+    });
+  }, []);
+
+  const clearMarkers = useCallback(() => {
+    setMarkers([]);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("coffee_roast_markers");
+    }
+  }, []);
+
+  const saveMarkersToLocalStorage = useCallback(
+    (markersToSave: RoastMarker[]) => {
+      if (typeof window === "undefined") return;
+
+      try {
+        localStorage.setItem(
+          "coffee_roast_markers",
+          JSON.stringify(markersToSave)
+        );
+      } catch (error) {
+        console.error("Failed to save markers to localStorage:", error);
+      }
+    },
+    []
+  );
+
+  // פונקציה לטעינת סימונים מ-localStorage
+  const loadMarkersFromLocalStorage = useCallback((): RoastMarker[] => {
+    if (typeof window === "undefined") return [];
+
+    try {
+      const savedMarkers = localStorage.getItem("coffee_roast_markers");
+      return savedMarkers ? JSON.parse(savedMarkers) : [];
+    } catch (error) {
+      console.error("Failed to load markers from localStorage:", error);
+      return [];
+    }
+  }, []);
+
+  useEffect(() => {
+    if (markers.length === 0 && !isRoasting) {
+      const savedMarkers = loadMarkersFromLocalStorage();
+      if (savedMarkers.length > 0) setMarkers(savedMarkers);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (markers.length > 0) {
+      saveMarkersToLocalStorage(markers);
+    }
+  }, [markers]);
+
+  useEffect(() => {
+    if (temperatureData.length === 0) {
+      setMarkers([]);
+      localStorage.removeItem("coffee_roast_markers");
+    }
+  }, [temperatureData.length]);
 
   return {
     // State
@@ -363,6 +454,7 @@ export default function useRoaster() {
     secondCrackTime,
     showRestorePrompt,
     temperatureUnit,
+    markers,
 
     // Temperature handling
     getDisplayTemperature,
@@ -370,6 +462,9 @@ export default function useRoaster() {
     toggleTemperatureUnit,
 
     // Actions
+    clearMarkers,
+    addMarker,
+    removeMarker,
     startRoast,
     pauseRoast,
     resetRoast,

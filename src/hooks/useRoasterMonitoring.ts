@@ -48,6 +48,7 @@ export function useRoasterMonitoring({
   time,
   setTime,
   setRoastStage,
+  roastStage,
   crackStatus,
   setCrackStatus,
   firstCrackTime,
@@ -174,19 +175,16 @@ export function useRoasterMonitoring({
   // Monitor roast stages and cracks
   useEffect(() => {
     // Update roast stage based on temperature
-    if (temperature < 200) {
-      setRoastStage("Green");
-    } else if (temperature < 300) {
-      setRoastStage("Yellow");
-    } else if (temperature < 350) {
-      setRoastStage("Light Brown");
-    } else if (temperature < 400) {
-      setRoastStage("Medium Brown");
-    } else if (temperature < 435) {
-      setRoastStage("Dark Brown");
-    } else {
-      setRoastStage("Nearly Black");
-    }
+    let newRoastStage = roastStage;
+    if (temperature < 200) newRoastStage = "Green";
+    else if (temperature < 300) newRoastStage = "Yellow";
+    else if (temperature < 350) newRoastStage = "Light Brown";
+    else if (temperature < 400) newRoastStage = "Medium Brown";
+    else if (temperature < 435) newRoastStage = "Dark Brown";
+    else newRoastStage = "Nearly Black";
+
+    // Update roast stage only if changed
+    if (newRoastStage !== roastStage) setRoastStage(newRoastStage);
 
     // Local first crack detection - only if not already detected by server
     if (
@@ -194,7 +192,7 @@ export function useRoasterMonitoring({
       temperature >= FIRST_CRACK.min &&
       temperature <= FIRST_CRACK.max
     ) {
-      setCrackStatus({ ...crackStatus, first: true }); // העבר אובייקט ישירות
+      setCrackStatus({ ...crackStatus, first: true });
       setFirstCrackTime(time);
       setNotification({ type: "info", message: "First crack detected!" });
     }
@@ -206,7 +204,7 @@ export function useRoasterMonitoring({
       temperature >= SECOND_CRACK.min &&
       temperature <= SECOND_CRACK.max
     ) {
-      setCrackStatus({ ...crackStatus, first: true }); // העבר אובייקט ישירות
+      setCrackStatus({ ...crackStatus, first: true });
       setSecondCrackTime(time);
       setNotification({ type: "info", message: "Second crack detected!" });
     }
@@ -241,6 +239,7 @@ export function useRoasterMonitoring({
     setNotification,
     setRoastStage,
     setCompleted,
+    roastStage,
   ]);
 
   // Auto clear notifications after 3 seconds

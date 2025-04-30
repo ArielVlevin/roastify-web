@@ -1,11 +1,13 @@
-// hooks/useRoasterState.ts
-import { useState, useRef } from "react";
+"use client";
+
+import { useState, useRef, useEffect } from "react";
 import {
   RoastProfile,
   TemperatureData,
   NotificationType,
   CrackStatus,
   PROFILES,
+  RoastMarker,
 } from "@/lib/types";
 import { getTemperatureUnit } from "@/lib/localStorageService";
 
@@ -13,6 +15,9 @@ import { getTemperatureUnit } from "@/lib/localStorageService";
 export const MAX_DURATION = 15 * 60;
 
 export function useRoasterState() {
+  // Client-side mounted state
+  const [isMounted, setIsMounted] = useState(false);
+
   // State
   const [isRoasting, setIsRoasting] = useState<boolean>(false);
   const [time, setTime] = useState<number>(0);
@@ -35,14 +40,28 @@ export function useRoasterState() {
   const [secondCrackTime, setSecondCrackTime] = useState<number | null>(null);
   const [hasRestoredSession, setHasRestoredSession] = useState<boolean>(false);
   const [showRestorePrompt, setShowRestorePrompt] = useState<boolean>(false);
-  const [temperatureUnit, setTempUnit] = useState<"F" | "C">(
-    getTemperatureUnit() || "F"
-  );
+
+  const [markers, setMarkers] = useState<RoastMarker[]>([]);
+
+  // IMPORTANT: Use a consistent default value for server-side rendering
+  // Don't call getTemperatureUnit() during initialization
+  const [temperatureUnit, setTempUnit] = useState<"F" | "C">("F");
 
   // Refs
   const fetchingRef = useRef<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+
+  // After hydration, load preferences from localStorage
+  useEffect(() => {
+    setIsMounted(true);
+
+    // Now it's safe to access localStorage
+    const savedUnit = getTemperatureUnit();
+    if (savedUnit !== temperatureUnit) {
+      setTempUnit(savedUnit);
+    }
+  }, [temperatureUnit]);
 
   return {
     // State
@@ -76,6 +95,9 @@ export function useRoasterState() {
     setShowRestorePrompt,
     temperatureUnit,
     setTempUnit,
+    isMounted,
+    markers,
+    setMarkers,
 
     // Refs
     fetchingRef,

@@ -1,11 +1,13 @@
-import React from "react";
-import { Button } from "./button";
+"use client";
 
-type TemperatureUnitToggleProps = {
+import type React from "react";
+import { Button } from "@/components/ui/button";
+
+interface TemperatureUnitToggleProps {
   temperatureUnit: "F" | "C";
   toggleTemperatureUnit: () => void;
   className?: string;
-};
+}
 
 const TemperatureUnitToggle: React.FC<TemperatureUnitToggleProps> = ({
   temperatureUnit,
@@ -13,13 +15,20 @@ const TemperatureUnitToggle: React.FC<TemperatureUnitToggleProps> = ({
   className = "",
 }) => {
   return (
-    <Button
-      onClick={toggleTemperatureUnit}
-      className={` px-2 py-1 text-sm rounded border border-gray-300 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${className} `}
-      title={`Switch to ${temperatureUnit === "F" ? "Celsius" : "Fahrenheit"}`}
-    >
-      °{temperatureUnit === "F" ? "C" : "F"}
-    </Button>
+    <div className={`flex items-center ${className}`}>
+      <span className="text-xs text-muted-foreground mr-2">
+        Temperature Unit:
+      </span>
+      <Button
+        onClick={toggleTemperatureUnit}
+        variant="outline"
+        size="sm"
+        className="h-8 px-2 text-xs font-medium"
+      >
+        °{temperatureUnit} <span className="ml-1 text-muted-foreground">→</span>{" "}
+        °{temperatureUnit === "F" ? "C" : "F"}
+      </Button>
+    </div>
   );
 };
 

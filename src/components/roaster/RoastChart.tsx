@@ -1,5 +1,7 @@
-// components/roaster/RoastChart.tsx
-import React, { useMemo } from "react";
+"use client";
+
+import type React from "react";
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -9,8 +11,9 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceDot,
 } from "recharts";
-import { TemperatureData } from "@/lib/types";
+import type { RoastMarker, TemperatureData } from "@/lib/types";
 
 interface RoastChartProps {
   data: TemperatureData[];
@@ -18,6 +21,7 @@ interface RoastChartProps {
   time: number;
   temperatureUnit: "F" | "C";
   getDisplayTemperature: (tempF: number) => number;
+  markers?: RoastMarker[];
 }
 
 const RoastChart: React.FC<RoastChartProps> = ({
@@ -26,6 +30,7 @@ const RoastChart: React.FC<RoastChartProps> = ({
   time,
   temperatureUnit,
   getDisplayTemperature,
+  markers = [],
 }) => {
   // Convert the temperature data based on the selected unit
   const convertedData = useMemo(() => {
@@ -50,20 +55,22 @@ const RoastChart: React.FC<RoastChartProps> = ({
   const yAxisDomain = temperatureUnit === "F" ? [0, 500] : [0, 260];
 
   return (
-    <div className="h-64">
+    <div className="h-64 sm:h-72 md:h-80">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={convertedData}
           margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="time"
             label={{
               value: "Time",
               position: "insideBottomRight",
               offset: -5,
+              fill: "var(--muted-foreground)",
             }}
+            tick={{ fill: "var(--muted-foreground)" }}
           />
           <YAxis
             domain={yAxisDomain}
@@ -71,14 +78,22 @@ const RoastChart: React.FC<RoastChartProps> = ({
               value: `Temperature (°${temperatureUnit})`,
               angle: -90,
               position: "insideLeft",
+              fill: "var(--muted-foreground)",
+            }}
+            tick={{ fill: "var(--muted-foreground)" }}
+          />
+          <Tooltip
+            formatter={formatTooltip}
+            contentStyle={{
+              backgroundColor: "var(--card)",
+              borderColor: "var(--border)",
             }}
           />
-          <Tooltip formatter={formatTooltip} />
           <Legend />
           <Line
             type="monotone"
             dataKey="temperature"
-            stroke="#e25c4b"
+            stroke="var(--accent)"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 8 }}
@@ -90,13 +105,35 @@ const RoastChart: React.FC<RoastChartProps> = ({
             <Line
               type="monotone"
               dataKey={() => displayTargetTemperature}
-              stroke="#3C3FE3FF"
+              stroke="var(--primary)"
               strokeDasharray="5 3"
               name="Target Temp"
               strokeWidth={1}
               dot={false}
             />
           )}
+
+          {markers.map((marker) => {
+            const matchingDataPoint = convertedData.find(
+              (point) => point.time === marker.time
+            ) || {
+              time: marker.time,
+              temp: getDisplayTemperature(marker.temperature),
+            };
+
+            return (
+              <ReferenceDot
+                key={marker.id}
+                x={matchingDataPoint.time}
+                y={matchingDataPoint.temperature}
+                r={6}
+                fill={marker.color || "#333"}
+                stroke="white"
+                strokeWidth={2}
+                label={{ value: marker.label, position: "top" }}
+              />
+            );
+          })}
         </LineChart>
       </ResponsiveContainer>
     </div>

@@ -5,6 +5,10 @@ import { TemperatureData } from "./types";
 
 // Key for storing active roast in localStorage
 const ACTIVE_ROAST_KEY = "artisan_active_roast";
+const TEMP_UNIT_KEY = "temperatureUnit";
+
+// Safe check for browser environment
+const isBrowser = typeof window !== "undefined";
 
 // Interface for active roast data
 export interface ActiveRoastData {
@@ -22,20 +26,53 @@ export interface ActiveRoastData {
 }
 
 /**
+ * Safe localStorage getter that works with SSR
+ */
+const safeGetItem = (key: string): string | null => {
+  if (!isBrowser) return null;
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.error(`Failed to get item ${key} from localStorage:`, error);
+    return null;
+  }
+};
+
+/**
+ * Safe localStorage setter that works with SSR
+ */
+const safeSetItem = (key: string, value: string): void => {
+  if (!isBrowser) return;
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.error(`Failed to set item ${key} in localStorage:`, error);
+  }
+};
+
+/**
+ * Safe localStorage remover that works with SSR
+ */
+const safeRemoveItem = (key: string): void => {
+  if (!isBrowser) return;
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error(`Failed to remove item ${key} from localStorage:`, error);
+  }
+};
+
+/**
  * Save active roast data to localStorage
  */
 export const saveActiveRoast = (data: ActiveRoastData): void => {
-  try {
-    localStorage.setItem(
-      ACTIVE_ROAST_KEY,
-      JSON.stringify({
-        ...data,
-        lastUpdated: Date.now(), // Always update timestamp
-      })
-    );
-  } catch (error) {
-    console.error("Failed to save roast to localStorage:", error);
-  }
+  safeSetItem(
+    ACTIVE_ROAST_KEY,
+    JSON.stringify({
+      ...data,
+      lastUpdated: Date.now(), // Always update timestamp
+    })
+  );
 };
 
 /**
@@ -43,10 +80,10 @@ export const saveActiveRoast = (data: ActiveRoastData): void => {
  * Returns null if no active roast data is found or if data is invalid
  */
 export const getActiveRoast = (): ActiveRoastData | null => {
-  try {
-    const data = localStorage.getItem(ACTIVE_ROAST_KEY);
-    if (!data) return null;
+  const data = safeGetItem(ACTIVE_ROAST_KEY);
+  if (!data) return null;
 
+  try {
     const roastData = JSON.parse(data) as ActiveRoastData;
 
     // Validate data has all required fields
@@ -63,7 +100,7 @@ export const getActiveRoast = (): ActiveRoastData | null => {
 
     return roastData;
   } catch (error) {
-    console.error("Failed to retrieve roast from localStorage:", error);
+    console.error("Failed to parse roast data from localStorage:", error);
     return null;
   }
 };
@@ -72,11 +109,7 @@ export const getActiveRoast = (): ActiveRoastData | null => {
  * Clear active roast data from localStorage
  */
 export const clearActiveRoast = (): void => {
-  try {
-    localStorage.removeItem(ACTIVE_ROAST_KEY);
-  } catch (error) {
-    console.error("Failed to clear roast from localStorage:", error);
-  }
+  safeRemoveItem(ACTIVE_ROAST_KEY);
 };
 
 /**
@@ -92,31 +125,31 @@ export const hasActiveRoast = (): boolean => {
 export const updateActiveRoast = (
   updatedFields: Partial<ActiveRoastData>
 ): void => {
-  try {
-    const currentData = getActiveRoast();
-    if (!currentData) return;
+  const currentData = getActiveRoast();
+  if (!currentData) return;
 
-    saveActiveRoast({
-      ...currentData,
-      ...updatedFields,
-      lastUpdated: Date.now(),
-    });
-  } catch (error) {
-    console.error("Failed to update active roast:", error);
-  }
+  saveActiveRoast({
+    ...currentData,
+    ...updatedFields,
+    lastUpdated: Date.now(),
+  });
 };
 
+/**
+ * Get temperature unit preference from localStorage
+ * Defaults to "F" if not set
+ */
 export function getTemperatureUnit(): "F" | "C" {
-  // בדיקה אם הדפדפן תומך באחסון מקומי
-  if (typeof window === "undefined" || !window.localStorage) return "F"; // ברירת מחדל במקרה של בעיה
+  // Default for SSR or if localStorage is unavailable
+  if (!isBrowser) return "F";
 
-  const unit = localStorage.getItem("temperatureUnit");
-  return unit === "C" ? "C" : "F"; // החזר 'F' אם אין ערך או אם הערך שגוי
+  const unit = safeGetItem(TEMP_UNIT_KEY);
+  return unit === "C" ? "C" : "F"; // Return "F" if value is missing or invalid
 }
 
+/**
+ * Set temperature unit preference in localStorage
+ */
 export function setTemperatureUnit(unit: "F" | "C"): void {
-  // בדיקה אם הדפדפן תומך באחסון מקומי
-  if (typeof window === "undefined" || !window.localStorage) return;
-
-  localStorage.setItem("temperatureUnit", unit);
+  safeSetItem(TEMP_UNIT_KEY, unit);
 }

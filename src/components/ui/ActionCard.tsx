@@ -25,7 +25,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
 }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-background rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer border w-full h-full ${className}`}
+    className={`flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-background/50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer border w-full h-full ${className}`}
   >
     <div className={`${iconBgColor} p-3 sm:p-4 rounded-full mb-3 sm:mb-4`}>
       {icon}

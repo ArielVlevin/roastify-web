@@ -1,7 +1,7 @@
 import type React from "react";
 import { Check } from "lucide-react";
 import type { CrackStatus, NotificationType } from "@/lib/types";
-import { CrackStatusBox, StatBox } from "../ui/StatBox";
+import { CrackStatusBox, StatBox } from "@/components/ui/StatBox";
 
 interface RoastStatsProps {
   time: number;
@@ -29,33 +29,6 @@ const RoastStats: React.FC<RoastStatsProps> = ({
 }) => {
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-foreground">
-          Roast Progress
-        </h2>
-
-        {/* Status Indicators */}
-        <div className="flex gap-3">
-          <div className="flex items-center gap-1">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                isRoasting ? "bg-primary animate-pulse" : "bg-muted"
-              }`}
-            ></div>
-            <span className="text-sm text-muted-foreground">
-              {isRoasting ? "Roasting" : "Idle"}
-            </span>
-          </div>
-
-          {completed && (
-            <div className="flex items-center gap-1 text-primary">
-              <Check size={16} />
-              <span className="text-sm">Complete</span>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Current Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <StatBox label="Time" value={formatTime(time)} />

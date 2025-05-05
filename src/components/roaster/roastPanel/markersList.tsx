@@ -1,0 +1,50 @@
+import { X } from "lucide-react";
+import type { RoastMarker } from "@/lib/types";
+
+interface MarkerListProps {
+  markers: RoastMarker[];
+  temperatureUnit: "C" | "F";
+  getDisplayTemperature: (temp: number) => number;
+  removeMarker: (id: string) => void;
+}
+
+const MarkerList = ({
+  markers,
+  temperatureUnit,
+  getDisplayTemperature,
+  removeMarker,
+}: MarkerListProps) => {
+  if (markers.length === 0) return null;
+
+  return (
+    <div className="mt-4 p-3 bg-muted/20 rounded-lg border border-border">
+      <h3 className="text-sm font-medium mb-2">Markings added</h3>
+      <div className="text-xs space-y-1">
+        {markers.map((marker) => (
+          <div key={marker.id} className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: marker.color || "#333" }}
+              />
+              <span>{marker.label}</span>
+              <span className="text-muted-foreground">
+                {Math.floor(marker.time / 60)}:
+                {(marker.time % 60).toString().padStart(2, "0")},{" "}
+                {getDisplayTemperature(marker.temperature)}°{temperatureUnit}
+              </span>
+            </div>
+            <button
+              onClick={() => removeMarker(marker.id)}
+              className="text-muted-foreground hover:text-destructive size-8"
+            >
+              <X size={12} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default MarkerList;

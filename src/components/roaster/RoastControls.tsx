@@ -1,17 +1,8 @@
 "use client";
 
 import type React from "react";
-import { Play, Pause, RotateCcw, Home } from "lucide-react";
 import type { RoastProfile } from "@/lib/types";
 import { formatTime } from "@/lib/converte";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -20,6 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "../ui/label";
+import ControlButtoms from "./roastController/controlButtoms";
+import CardPanel from "../ui/cardPanel";
+import SectionTitle from "../ui/sectionTitle";
 
 interface RoastControlsProps {
   isRoasting: boolean;
@@ -30,7 +25,6 @@ interface RoastControlsProps {
   onPauseRoast: () => void;
   onResetRoast: () => void;
   onSelectProfile: (profileName: string) => void;
-  onGoHome: () => void;
 }
 
 const RoastControls: React.FC<RoastControlsProps> = ({
@@ -42,31 +36,25 @@ const RoastControls: React.FC<RoastControlsProps> = ({
   onPauseRoast,
   onResetRoast,
   onSelectProfile,
-  onGoHome,
 }) => {
   return (
-    <Card className="border-border shadow-sm">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-semibold text-foreground">
-          Roast Controls
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
+    <CardPanel>
+      <div className="flex flex-col gap-2">
+        <SectionTitle>Roast Controls</SectionTitle>
         {/* Profile Selection */}
         <div>
-          <label
+          <Label
             htmlFor="profile-select"
             className="block text-sm font-medium text-foreground mb-2"
           >
             Select Roast Profile
-          </label>
+          </Label>
           <Select
             value={selectedProfile.name}
             onValueChange={onSelectProfile}
             disabled={isRoasting}
           >
-            <SelectTrigger id="profile-select" className="w-full bg-background">
+            <SelectTrigger id="profile-select" className="w-full">
               <SelectValue placeholder="Select a profile" />
             </SelectTrigger>
             <SelectContent>
@@ -80,70 +68,33 @@ const RoastControls: React.FC<RoastControlsProps> = ({
         </div>
 
         {/* Description */}
-        <div className="bg-muted/20 p-3 rounded-md text-sm text-muted-foreground border border-border">
+        <div className="bg-muted/20 p-3 rounded-md text-sm text-muted-foreground border border-border mt-4">
           <p>{selectedProfile.description}</p>
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="grid grid-cols-3 gap-2">
-          <Button
-            onClick={onStartRoast}
-            disabled={isRoasting}
-            variant="default"
-            className="flex flex-col items-center justify-center h-auto py-3 bg-primary hover:bg-primary-dark"
-          >
-            <Play size={20} className="mb-1" />
-            <span className="text-xs sm:text-sm">Start</span>
-          </Button>
-
-          <Button
-            onClick={onPauseRoast}
-            disabled={!isRoasting}
-            variant="secondary"
-            className="flex flex-col items-center justify-center h-auto py-3 bg-accent hover:bg-accent-dark text-accent-foreground"
-          >
-            <Pause size={20} className="mb-1" />
-            <span className="text-xs sm:text-sm">Pause</span>
-          </Button>
-
-          <Button
-            onClick={onResetRoast}
-            variant="destructive"
-            className="flex flex-col items-center justify-center h-auto py-3"
-          >
-            <RotateCcw size={20} className="mb-1" />
-            <span className="text-xs sm:text-sm">Reset</span>
-          </Button>
+      <ControlButtoms
+        onStartRoast={onStartRoast}
+        onPauseRoast={onPauseRoast}
+        onResetRoast={onResetRoast}
+        isRoasting={isRoasting}
+      />
+      {/* Time Display */}
+      <div className="text-center p-4 bg-muted/10 rounded-lg border border-border">
+        <div className="text-sm text-muted-foreground mb-1">Elapsed Time</div>
+        <div className="text-2xl sm:text-3xl font-mono text-foreground">
+          {formatTime(time)}
         </div>
-
-        {/* Time Display */}
-        <div className="text-center p-4 bg-muted/10 rounded-lg border border-border">
-          <div className="text-sm text-muted-foreground mb-1">Elapsed Time</div>
-          <div className="text-2xl sm:text-3xl font-mono text-foreground">
-            {formatTime(time)}
-          </div>
-          {isRoasting && (
-            <Badge
-              variant="outline"
-              className="mt-2 bg-primary/10 text-primary animate-pulse"
-            >
-              Roasting in progress
-            </Badge>
-          )}
-        </div>
-      </CardContent>
-
-      <CardFooter>
-        <Button
-          onClick={onGoHome}
-          variant="outline"
-          className="w-full flex items-center justify-center"
-        >
-          <Home size={16} className="mr-2" />
-          <span>Back to Home</span>
-        </Button>
-      </CardFooter>
-    </Card>
+        {isRoasting && (
+          <Badge
+            variant="outline"
+            className="mt-2 bg-primary/10 text-primary animate-pulse"
+          >
+            Roasting in progress
+          </Badge>
+        )}
+      </div>
+    </CardPanel>
   );
 };
 

@@ -1,7 +1,12 @@
 // hooks/useRoasterControls.ts
 import { useCallback } from "react";
 import * as api from "@/lib/api";
-import { RoastProfile, TemperatureData, NotificationType } from "@/lib/types";
+import {
+  RoastProfile,
+  TemperatureData,
+  NotificationType,
+  CrackStatus,
+} from "@/lib/types";
 import { clearActiveRoast } from "@/lib/localStorageService";
 
 type ControlProps = {
@@ -13,19 +18,18 @@ type ControlProps = {
   startTimeRef: React.MutableRefObject<number>;
   setTime: (time: number) => void;
   setCompleted: (completed: boolean) => void;
-  setCrackStatus: (crackStatus: any) => void;
+  setCrackStatus: (crackStatus: CrackStatus) => void;
   setFirstCrackTime: (time: number | null) => void;
   setSecondCrackTime: (time: number | null) => void;
   setTemperatureData: (
     data: TemperatureData[] | ((prev: TemperatureData[]) => TemperatureData[])
   ) => void;
   setNotification: (notification: NotificationType | null) => void;
-  syncStateWithServer: () => Promise<any>;
+  syncStateWithServer: () => Promise<string>;
   MAX_DURATION: number;
 };
 
 export function useRoasterControls({
-  isRoasting,
   setIsRoasting,
   resetRoast,
   temperatureData,

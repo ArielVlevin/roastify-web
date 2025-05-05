@@ -1,17 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Coffee, Save, X } from "lucide-react";
 import useRoaster from "@/hooks/useRoaster";
-import RoastControls from "@/components/roaster/RoastControls";
-import RoastChart from "@/components/roaster/RoastChart";
 import SaveRoastForm from "@/components/roaster/SaveRoastForm";
-import RoastStats from "@/components/roaster/RoastStats";
 import { useRouter } from "next/navigation";
-import RestoreSessionPrompt from "@/components/roaster/RestoreSessionPrompt";
-import TemperatureUnitToggle from "@/components/ui/TemperatureUnitToggle";
-import { Button } from "@/components/ui/button";
-import MarkerButtons from "@/components/roaster/MarkerButtons";
+
+import RoastPanel from "@/components/roaster/roastPanel";
+import RoastLayout from "@/app/roast/RoastLayout";
+import RoastControls from "@/components/roaster/roastControls";
+import RestoreSessionPrompt from "@/components/roaster/restoreSessionPrompt";
 
 export default function RoastPage() {
   const router = useRouter();
@@ -48,9 +45,7 @@ export default function RoastPage() {
   } = useRoaster();
 
   const handleSaveClick = () => {
-    if (temperatureData.length === 0) {
-      return;
-    }
+    if (temperatureData.length === 0) return;
     setShowSaveForm(true);
   };
 
@@ -82,141 +77,44 @@ export default function RoastPage() {
   }, [isRoasting]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background p-4 sm:p-6">
-      <header className="mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
-          <Coffee size={28} className="text-primary" /> Coffee Roaster
-        </h1>
+    <RoastLayout
+      temperatureData={temperatureData}
+      handleSaveClick={handleSaveClick}
+      onGoHome={handleGoHome}
+    >
+      {/* Left Panel: Controls */}
+      <RoastControls
+        isRoasting={isRoasting}
+        profiles={profiles}
+        selectedProfile={selectedProfile}
+        onStartRoast={startRoast}
+        onPauseRoast={pauseRoast}
+        onResetRoast={resetRoast}
+        onSelectProfile={selectProfile}
+        time={time}
+      />
 
-        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <Button
-            onClick={handleSaveClick}
-            disabled={temperatureData.length === 0}
-            className="flex items-center gap-1 bg-primary hover:bg-primary-dark text-primary-foreground py-2 px-3 sm:px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-          >
-            <Save size={16} /> Save Roast
-          </Button>
-        </div>
-      </header>
+      {/* Right Panel: Real-time Data */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Left Panel: Controls */}
-        <RoastControls
-          isRoasting={isRoasting}
-          profiles={profiles}
-          selectedProfile={selectedProfile}
-          onStartRoast={startRoast}
-          onPauseRoast={pauseRoast}
-          onResetRoast={resetRoast}
-          onSelectProfile={selectProfile}
-          onGoHome={handleGoHome}
-          time={time}
-        />
-
-        {/* Right Panel: Real-time Data */}
-        <div className="bg-card p-4 rounded-lg shadow-sm lg:col-span-2 border border-border">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-foreground">
-              Target Profile
-            </h2>
-            <TemperatureUnitToggle
-              temperatureUnit={temperatureUnit}
-              toggleTemperatureUnit={toggleTemperatureUnit}
-              className="ml-2"
-            />
-          </div>
-
-          {/* Target Info */}
-          <div className="mt-2 p-3 bg-muted/30 rounded-lg border border-border mb-4">
-            <div className="flex flex-col sm:flex-row justify-between text-sm">
-              <div className="mb-2 sm:mb-0">
-                <span className="text-muted-foreground">
-                  Target Temperature:
-                </span>
-                <span className="ml-2 font-medium text-foreground">
-                  {formatTemperature(selectedProfile.targetTemp)}
-                </span>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Target Time:</span>
-                <span className="ml-2 font-medium text-foreground">
-                  {formatTime(selectedProfile.duration * 60)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <RoastStats
-            time={time}
-            temperature={temperature}
-            roastStage={roastStage}
-            crackStatus={crackStatus}
-            isRoasting={isRoasting}
-            completed={completed}
-            notification={notification}
-            temperatureUnit={temperatureUnit}
-            formatTemperature={formatTemperature}
-            formatTime={formatTime}
-          />
-
-          {/* Temperature Chart */}
-          <div className="mb-4 mt-6">
-            <RoastChart
-              data={temperatureData}
-              targetTemperature={selectedProfile.targetTemp}
-              time={time}
-              temperatureUnit={temperatureUnit}
-              getDisplayTemperature={getDisplayTemperature}
-              markers={markers}
-            />
-          </div>
-
-          <MarkerButtons
-            className="flex justify-center mb-4"
-            onAddMarker={addMarker}
-            disabled={!isRoasting && temperatureData.length === 0}
-          />
-          {markers.length > 0 && (
-            <div className="mt-4 p-3 bg-muted/20 rounded-lg border border-border">
-              <h3 className="text-sm font-medium mb-2">Markings added</h3>
-              <div className="text-xs space-y-1">
-                {markers.map((marker) => (
-                  <div
-                    key={marker.id}
-                    className="flex justify-between items-center"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: marker.color || "#333" }}
-                      />
-                      <span>{marker.label}</span>
-                      <span className="text-muted-foreground">
-                        {Math.floor(marker.time / 60)}:
-                        {(marker.time % 60).toString().padStart(2, "0")},{" "}
-                        {getDisplayTemperature(marker.temperature)}°
-                        {temperatureUnit}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => removeMarker(marker.id)}
-                      className="text-muted-foreground hover:text-destructive size-8"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <footer className="mt-6 sm:mt-8 text-center text-muted-foreground text-xs sm:text-sm">
-        <p>
-          Connected to Raspberry Pi with Phidget sensors: hub0000_0, tmp1101_0
-        </p>
-      </footer>
+      <RoastPanel
+        time={time}
+        temperature={temperature}
+        selectedProfile={selectedProfile}
+        temperatureUnit={temperatureUnit}
+        markers={markers}
+        temperatureData={temperatureData}
+        isRoasting={isRoasting}
+        roastStage={roastStage}
+        crackStatus={crackStatus}
+        notification={notification}
+        completed={completed}
+        addMarker={addMarker}
+        getDisplayTemperature={getDisplayTemperature}
+        toggleTemperatureUnit={toggleTemperatureUnit}
+        formatTemperature={formatTemperature}
+        formatTime={formatTime}
+        removeMarker={removeMarker}
+      />
 
       {/* Restore Session Prompt */}
       {showRestorePrompt && (
@@ -234,6 +132,6 @@ export default function RoastPage() {
           onCancel={() => setShowSaveForm(false)}
         />
       )}
-    </div>
+    </RoastLayout>
   );
 }

@@ -1,32 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import {
-  Coffee,
-  PlusCircle,
-  FolderOpen,
-  ClipboardList,
-  Settings,
-} from "lucide-react";
+import { Coffee, PlusCircle, FolderOpen, ClipboardList } from "lucide-react";
 import ActionCard from "../ui/ActionCard";
-import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   const router = useRouter();
 
   return (
     <div className="flex flex-col items-center justify-between min-h-screen bg-background p-4 sm:p-6">
-      <div className="fixed top-4 right-4 z-10">
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full shadow-sm"
-          onClick={() => router.push("/settings")}
-        >
-          <Settings className="h-[1.2rem] w-[1.2rem] text-primary" />
-          <span className="sr-only">Settings</span>
-        </Button>
-      </div>
-
       <div className="w-full max-w-5xl mx-auto flex-1 flex flex-col items-center justify-center py-8">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
@@ -76,38 +57,9 @@ export default function HomePage() {
           />
         </div>
       </div>
-
-      <footer className="w-full max-w-4xl mx-auto mt-6 sm:mt-8 text-center py-4">
-        <p className="text-sm sm:text-base text-muted-foreground mb-3">
-          Select an option to get started with your coffee roasting journey
-        </p>
-        <div className="flex justify-center gap-2 sm:gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-primary hover:bg-primary/10 text-xs sm:text-sm"
-            onClick={() => router.push("/about")}
-          >
-            About
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-secondary hover:bg-secondary/10 text-xs sm:text-sm"
-            onClick={() => router.push("/help")}
-          >
-            Help
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-accent hover:bg-accent/10 text-xs sm:text-sm"
-            onClick={() => router.push("/contact")}
-          >
-            Contact
-          </Button>
-        </div>
-      </footer>
+      <p className="text-sm sm:text-base text-muted-foreground mb-3">
+        Select an option to get started with your coffee roasting journey
+      </p>
     </div>
   );
 }

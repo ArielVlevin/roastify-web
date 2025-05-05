@@ -1,4 +1,3 @@
-// hooks/useRoasterSync.ts
 import { useCallback } from "react";
 import * as api from "@/lib/api";
 import { TemperatureData, CrackStatus, RoastProfile } from "@/lib/types";
@@ -11,7 +10,7 @@ type RoasterStateProps = {
   crackStatus: CrackStatus;
   selectedProfile: RoastProfile;
   setShowRestorePrompt: (show: boolean) => void;
-  showRestorePrompt: boolean; // הוספת המשתנה כפרמטר
+  showRestorePrompt: boolean;
 };
 
 export function useRoasterSync({
@@ -21,7 +20,7 @@ export function useRoasterSync({
   crackStatus,
   selectedProfile,
   setShowRestorePrompt,
-  showRestorePrompt, // יש להוסיף גם כאן
+  showRestorePrompt,
 }: RoasterStateProps) {
   const syncStateWithServer = useCallback(async () => {
     try {
@@ -59,7 +58,7 @@ export function useRoasterSync({
         console.log("Active roast found on server but not in local storage");
 
         const newActiveRoast = {
-          startTime: serverState.start_time * 1000, // Convert seconds to milliseconds
+          startTime: serverState.start_time * 1000,
           lastUpdated: Date.now(),
           temperatureData: serverState.data_points || [],
           selectedProfileName: selectedProfile.name,

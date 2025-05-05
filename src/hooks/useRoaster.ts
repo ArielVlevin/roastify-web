@@ -405,7 +405,6 @@ export default function useRoaster() {
     []
   );
 
-  // פונקציה לטעינת סימונים מ-localStorage
   const loadMarkersFromLocalStorage = useCallback((): RoastMarker[] => {
     if (typeof window === "undefined") return [];
 

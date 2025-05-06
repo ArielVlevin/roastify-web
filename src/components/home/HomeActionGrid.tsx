@@ -6,8 +6,8 @@ import {
   ClipboardList,
   LucideIcon,
 } from "lucide-react";
-import ActionCard from "@/components/ui/ActionCard";
 import { useRouter } from "next/navigation";
+import ActionCard from "@/components/ui/app-ui/actionCard";
 
 interface ActionItem {
   title: string;

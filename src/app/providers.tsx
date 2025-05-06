@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { RoastProvider } from "@/context/RoastContext";
 import { ActiveRoastAlert } from "@/components/ActiveRoastAlert";
 import Layout from "@/components/layout/Layout";

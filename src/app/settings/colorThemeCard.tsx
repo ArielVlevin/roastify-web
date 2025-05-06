@@ -1,0 +1,88 @@
+import { ColorTheme } from "@/components/theme/theme-provider";
+import { Cherry, Coffee, Leaf, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SubPanel } from "@/components/ui/app-ui/panel";
+import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export default function ColorThemeCard({
+  colorTheme,
+  setColorTheme,
+}: {
+  colorTheme: ColorTheme;
+  setColorTheme: (theme: ColorTheme) => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  const getColorThemeIcon = () => {
+    switch (colorTheme) {
+      case "coffee":
+        return <Coffee className="h-5 w-5" />;
+      case "mint":
+        return <Leaf className="h-5 w-5" />;
+      case "berry":
+        return <Cherry className="h-5 w-5" />;
+      default:
+        return <Palette className="h-5 w-5" />;
+    }
+  };
+
+  return (
+    <SubPanel>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          {getColorThemeIcon()} Color Theme
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium leading-none">Current Theme</p>
+            <p className="text-sm text-muted-foreground">
+              Choose a color scheme for the application
+            </p>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto capitalize">
+                {colorTheme || "Default"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Color Themes</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup
+                value={colorTheme}
+                onValueChange={(v) => setColorTheme(v as ColorTheme)}
+              >
+                <DropdownMenuRadioItem value="default">
+                  <Palette className="mr-2 h-4 w-4" /> Default
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="coffee">
+                  <Coffee className="mr-2 h-4 w-4" /> Coffee
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="mint">
+                  <Leaf className="mr-2 h-4 w-4" /> Mint
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="berry">
+                  <Cherry className="mr-2 h-4 w-4" /> Berry
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </CardContent>
+    </SubPanel>
+  );
+}

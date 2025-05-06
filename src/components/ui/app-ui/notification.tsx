@@ -1,8 +1,7 @@
-// components/ui/Notification.tsx
 import React, { useEffect } from "react";
 import { AlertTriangle, Check, Info, X } from "lucide-react";
 import { NotificationType } from "@/lib/types";
-import { Button } from "./button";
+import { Button } from "@/components/ui/button";
 
 interface NotificationProps {
   notification: NotificationType;

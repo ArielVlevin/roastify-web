@@ -1,11 +1,11 @@
-import MarkerButtons from "@/components/roaster/roastPanel/MarkerButtons";
+import MarkerButtons from "@/components/roaster/roastPanel/markerButtons";
 import MarkerList from "@/components/roaster/roastPanel/markersList";
-import RoastChart from "@/components/roaster/roastPanel/RoastChart";
-import RoastStats from "@/components/roaster/roastPanel/RoastStats";
+import RoastChart from "@/components/roaster/roastPanel/roastChart";
+import RoastStats from "@/components/roaster/roastPanel/roastStats";
 import StatusIndicator from "@/components/roaster/roastPanel/statusIndicator";
 import TargetProfileInfo from "@/components/roaster/roastPanel/targetProfileInfo";
-import CardPanel from "@/components/ui/cardPanel";
-import SectionTitle from "@/components/ui/sectionTitle";
+import { Panel } from "@/components/ui/app-ui/panel";
+import Title from "@/components/ui/app-ui/title";
 import {
   CrackStatus,
   NotificationType,
@@ -13,6 +13,7 @@ import {
   RoastProfile,
   TemperatureData,
 } from "@/lib/types";
+import RoastNotifications from "@/components/roaster/roastPanel/roastNotifications";
 
 interface RoastPanelProps {
   time: number;
@@ -53,21 +54,18 @@ const RoastPanel = ({
   removeMarker,
 }: RoastPanelProps) => {
   return (
-    <CardPanel className="lg:col-span-2 col-span-1">
-      {/* Profile Header */}
+    <Panel className="lg:col-span-2 col-span-1">
       <div>
-        <SectionTitle>Target Profile</SectionTitle>
+        <Title>Target Profile</Title>
         <TargetProfileInfo
           selectedProfile={selectedProfile}
           formatTemperature={formatTemperature}
           formatTime={formatTime}
         />
       </div>
-
-      {/* Current Stats */}
       <div>
         <div className="flex justify-between items-center">
-          <SectionTitle>Roast Progress</SectionTitle>
+          <Title>Roast Progress</Title>
           <StatusIndicator isRoasting={isRoasting} completed={completed} />
         </div>
         <RoastStats
@@ -75,17 +73,14 @@ const RoastPanel = ({
           temperature={temperature}
           roastStage={roastStage}
           crackStatus={crackStatus}
-          isRoasting={isRoasting}
-          completed={completed}
-          notification={notification}
           temperatureUnit={temperatureUnit}
           formatTemperature={formatTemperature}
           formatTime={formatTime}
         />
+        <RoastNotifications notification={notification} />
       </div>
-      {/* Temperature Chart */}
       <div>
-        <SectionTitle>Roasting Graph</SectionTitle>
+        <Title>Roasting Graph</Title>
         <RoastChart
           data={temperatureData}
           targetTemperature={selectedProfile.targetTemp}
@@ -96,7 +91,6 @@ const RoastPanel = ({
         />
       </div>
 
-      {/* Markers */}
       <div>
         <MarkerButtons
           className="flex justify-center mb-4"
@@ -110,7 +104,7 @@ const RoastPanel = ({
           removeMarker={removeMarker}
         />
       </div>
-    </CardPanel>
+    </Panel>
   );
 };
 

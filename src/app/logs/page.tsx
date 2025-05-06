@@ -52,7 +52,7 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background p-4 sm:p-6">
+    <div className="flex flex-col p-4 sm:p-6">
       <header className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <Button

@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Title from "@/components/ui/app-ui/title";
 
 export default function ColorThemeCard({
   colorTheme,
@@ -39,50 +40,50 @@ export default function ColorThemeCard({
   };
 
   return (
-    <SubPanel>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {getColorThemeIcon()} Color Theme
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-medium leading-none">Current Theme</p>
-            <p className="text-sm text-muted-foreground">
-              Choose a color scheme for the application
-            </p>
+    <div>
+      <Title className="flex items-center gap-2">
+        {getColorThemeIcon()} Color Theme
+      </Title>
+      <SubPanel>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">Current Theme</p>
+              <p className="text-sm text-muted-foreground">
+                Choose a color scheme for the application
+              </p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto capitalize">
+                  {colorTheme || "Default"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Color Themes</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup
+                  value={colorTheme}
+                  onValueChange={(v) => setColorTheme(v as ColorTheme)}
+                >
+                  <DropdownMenuRadioItem value="default">
+                    <Palette className="mr-2 h-4 w-4" /> Default
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="coffee">
+                    <Coffee className="mr-2 h-4 w-4" /> Coffee
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="mint">
+                    <Leaf className="mr-2 h-4 w-4" /> Mint
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="berry">
+                    <Cherry className="mr-2 h-4 w-4" /> Berry
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto capitalize">
-                {colorTheme || "Default"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Color Themes</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={colorTheme}
-                onValueChange={(v) => setColorTheme(v as ColorTheme)}
-              >
-                <DropdownMenuRadioItem value="default">
-                  <Palette className="mr-2 h-4 w-4" /> Default
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="coffee">
-                  <Coffee className="mr-2 h-4 w-4" /> Coffee
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="mint">
-                  <Leaf className="mr-2 h-4 w-4" /> Mint
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="berry">
-                  <Cherry className="mr-2 h-4 w-4" /> Berry
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </CardContent>
-    </SubPanel>
+        </CardContent>
+      </SubPanel>
+    </div>
   );
 }

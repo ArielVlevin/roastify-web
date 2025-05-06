@@ -17,7 +17,6 @@ import { getTemperatureUnit } from "@/lib/localStorageService";
 import { useTemperatureHandling } from "@/hooks/useTemperatureHandling";
 
 import { Button } from "@/components/ui/button";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +30,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Panel, SubPanel } from "@/components/ui/app-ui/panel";
 import { useColorTheme } from "@/components/theme/theme-provider";
 import ColorThemeCard from "./colorThemeCard";
+import Title from "@/components/ui/app-ui/title";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -173,14 +173,12 @@ export default function SettingsPage() {
         )}
 
         {settings.map((setting) => (
-          <SubPanel key={setting.key}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                {setting.icon} {setting.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <div key={setting.key}>
+            <Title className="flex items-center gap-2">
+              {setting.icon} {setting.title}
+            </Title>
+            <SubPanel className="p-8 flex flex-col ">
+              <div className="flex items-center justify-between gap-16">
                 <div className="space-y-1">
                   <p className="text-sm font-medium leading-none">Current</p>
                   <p className="text-sm text-muted-foreground">
@@ -212,8 +210,8 @@ export default function SettingsPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </CardContent>
-          </SubPanel>
+            </SubPanel>
+          </div>
         ))}
 
         <ColorThemeCard colorTheme={colorTheme} setColorTheme={setColorTheme} />

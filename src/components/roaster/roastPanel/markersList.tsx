@@ -1,19 +1,17 @@
 import { X } from "lucide-react";
 import type { RoastMarker } from "@/lib/types";
+import { usePreferencesStore } from "@/lib/store/preferencesStore";
 
 interface MarkerListProps {
   markers: RoastMarker[];
-  temperatureUnit: "C" | "F";
-  getDisplayTemperature: (temp: number) => number;
   removeMarker: (id: string) => void;
 }
 
-const MarkerList = ({
-  markers,
-  temperatureUnit,
-  getDisplayTemperature,
-  removeMarker,
-}: MarkerListProps) => {
+const MarkerList = ({ markers, removeMarker }: MarkerListProps) => {
+  const formatTemperature = usePreferencesStore(
+    (state) => state.formatTemperature
+  );
+
   if (markers.length === 0) return null;
 
   return (
@@ -31,7 +29,7 @@ const MarkerList = ({
               <span className="text-muted-foreground">
                 {Math.floor(marker.time / 60)}:
                 {(marker.time % 60).toString().padStart(2, "0")},{" "}
-                {getDisplayTemperature(marker.temperature)}°{temperatureUnit}
+                {formatTemperature(marker.temperature)}
               </span>
             </div>
             <button

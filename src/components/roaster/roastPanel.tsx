@@ -19,7 +19,6 @@ interface RoastPanelProps {
   time: number;
   temperature: number;
   selectedProfile: RoastProfile;
-  temperatureUnit: "F" | "C";
   markers: RoastMarker[];
   temperatureData: TemperatureData[];
   isRoasting: boolean;
@@ -28,9 +27,6 @@ interface RoastPanelProps {
   notification: NotificationType | null;
   completed: boolean;
   addMarker: (label: string, color?: string, notes?: string) => void;
-  getDisplayTemperature: (tempF: number) => number;
-  toggleTemperatureUnit: () => void;
-  formatTemperature: (temp: number) => string;
   formatTime: (time: number) => string;
   removeMarker: (markerId: string) => void;
 }
@@ -39,7 +35,6 @@ const RoastPanel = ({
   time,
   temperature,
   selectedProfile,
-  temperatureUnit,
   markers,
   temperatureData,
   isRoasting,
@@ -48,8 +43,6 @@ const RoastPanel = ({
   notification,
   completed,
   addMarker,
-  getDisplayTemperature,
-  formatTemperature,
   formatTime,
   removeMarker,
 }: RoastPanelProps) => {
@@ -59,7 +52,6 @@ const RoastPanel = ({
         <Title>Target Profile</Title>
         <TargetProfileInfo
           selectedProfile={selectedProfile}
-          formatTemperature={formatTemperature}
           formatTime={formatTime}
         />
       </div>
@@ -73,8 +65,6 @@ const RoastPanel = ({
           temperature={temperature}
           roastStage={roastStage}
           crackStatus={crackStatus}
-          temperatureUnit={temperatureUnit}
-          formatTemperature={formatTemperature}
           formatTime={formatTime}
         />
         <RoastNotifications notification={notification} />
@@ -85,8 +75,6 @@ const RoastPanel = ({
           data={temperatureData}
           targetTemperature={selectedProfile.targetTemp}
           time={time}
-          temperatureUnit={temperatureUnit}
-          getDisplayTemperature={getDisplayTemperature}
           markers={markers}
         />
       </div>
@@ -97,12 +85,7 @@ const RoastPanel = ({
           onAddMarker={addMarker}
           disabled={!isRoasting && temperatureData.length === 0}
         />
-        <MarkerList
-          markers={markers}
-          temperatureUnit={temperatureUnit}
-          getDisplayTemperature={getDisplayTemperature}
-          removeMarker={removeMarker}
-        />
+        <MarkerList markers={markers} removeMarker={removeMarker} />
       </div>
     </Panel>
   );

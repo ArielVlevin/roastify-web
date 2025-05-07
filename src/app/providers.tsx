@@ -2,7 +2,6 @@
 
 import { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { RoastProvider } from "@/context/RoastContext";
 import { ActiveRoastAlert } from "@/components/ActiveRoastAlert";
 import Layout from "@/components/layout/Layout";
 
@@ -18,11 +17,9 @@ export function Providers({ children }: ProvidersProps) {
       enableSystem
       disableTransitionOnChange
     >
-      <RoastProvider>
-        <ActiveRoastAlert />
+      <ActiveRoastAlert />
 
-        <Layout>{children}</Layout>
-      </RoastProvider>
+      <Layout>{children}</Layout>
     </ThemeProvider>
   );
 }

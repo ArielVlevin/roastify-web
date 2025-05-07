@@ -13,8 +13,9 @@ import {
   Check,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { getTemperatureUnit } from "@/lib/localStorageService";
-import { useTemperatureHandling } from "@/hooks/useTemperatureHandling";
+
+// ייבוא של ה-store במקום ה-hooks הישנים
+import { useRoastStore } from "@/lib/store/roastStore";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,12 +38,10 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { colorTheme, setColorTheme } = useColorTheme();
 
-  const [temperatureUnit, setTempUnit] = useState<"F" | "C">(
-    getTemperatureUnit() || "F"
-  );
-  const { toggleTemperatureUnit } = useTemperatureHandling(
-    temperatureUnit,
-    setTempUnit
+  // שימוש ב-Zustand במקום ב-hooks הישנים
+  const temperatureUnit = useRoastStore((state) => state.temperatureUnit);
+  const toggleTemperatureUnit = useRoastStore(
+    (state) => state.toggleTemperatureUnit
   );
 
   const [mounted, setMounted] = useState(false);

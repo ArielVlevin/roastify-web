@@ -14,13 +14,12 @@ import {
   ReferenceDot,
 } from "recharts";
 import type { RoastMarker, TemperatureData } from "@/lib/types";
+import { usePreferencesStore } from "@/lib/store/preferencesStore";
 
 interface RoastChartProps {
   data: TemperatureData[];
   targetTemperature?: number;
   time: number;
-  temperatureUnit: "F" | "C";
-  getDisplayTemperature: (tempF: number) => number;
   markers?: RoastMarker[];
 }
 
@@ -28,30 +27,28 @@ const RoastChart: React.FC<RoastChartProps> = ({
   data,
   targetTemperature,
   time,
-  temperatureUnit,
-  getDisplayTemperature,
   markers = [],
 }) => {
-  // Convert the temperature data based on the selected unit
+  const formatTemperature = usePreferencesStore(
+    (state) => state.formatTemperature
+  );
+  const temperatureUnit = usePreferencesStore((state) => state.temperatureUnit);
+
   const convertedData = useMemo(() => {
     return data.map((point) => ({
       ...point,
-      temperature: getDisplayTemperature(point.temperature),
+      temperature: point.temperature,
     }));
-  }, [data, getDisplayTemperature]);
+  }, [data]);
 
-  // Convert target temperature if it exists
-  const displayTargetTemperature = targetTemperature
-    ? getDisplayTemperature(targetTemperature)
-    : undefined;
+  const formatTooltip = (value: number, name: string) => {
+    if (name === "Current Temp") {
+      return [formatTemperature(value), name];
+    }
+    return [value, name];
+  };
 
-  // Custom tooltip formatter to add proper unit to temperature values
-  const formatTooltip = (value: number) => [
-    `${value}°${temperatureUnit}`,
-    "Temperature",
-  ];
-
-  // Determine Y-axis domain based on temperature unit
+  // הגדרת תחום ציר ה-Y בהתאם ליחידת הטמפרטורה
   const yAxisDomain = temperatureUnit === "F" ? [0, 500] : [0, 260];
 
   return (
@@ -100,11 +97,11 @@ const RoastChart: React.FC<RoastChartProps> = ({
             name="Current Temp"
           />
 
-          {/* Target temperature reference line */}
-          {time > 0 && displayTargetTemperature && (
+          {/* קו לטמפרטורת המטרה */}
+          {time > 0 && targetTemperature && (
             <Line
               type="monotone"
-              dataKey={() => displayTargetTemperature}
+              dataKey={() => targetTemperature}
               stroke="var(--primary)"
               strokeDasharray="5 3"
               name="Target Temp"
@@ -113,12 +110,13 @@ const RoastChart: React.FC<RoastChartProps> = ({
             />
           )}
 
+          {/* נקודות סימון */}
           {markers.map((marker) => {
             const matchingDataPoint = convertedData.find(
               (point) => point.time === marker.time
             ) || {
               time: marker.time,
-              temp: getDisplayTemperature(marker.temperature),
+              temperature: marker.temperature,
             };
 
             return (

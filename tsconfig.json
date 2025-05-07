@@ -27,7 +27,16 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../../old/temperature-chart.tsx"
+    "../../old/temperature-chart.tsx",
+    "../../old/_api.ts",
+    "../../old/localStorageService.ts",
+    "../../old/hook/_useRoaster.ts",
+    "../../old/hook/useRoasterControls.ts",
+    "../../old/hook/useRoasterMonitoring.ts",
+    "../../old/hook/useRoasterSession.ts",
+    "../../old/hook/useRoasterState.ts",
+    "../../old/hook/useRoasterSync.ts",
+    "../../old/useTemperatureHandling.ts"
   ],
   "exclude": ["node_modules"]
 }

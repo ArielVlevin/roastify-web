@@ -1,7 +1,7 @@
 import { ColorTheme } from "@/components/theme/theme-provider";
 import { Cherry, Coffee, Leaf, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { SubPanel } from "@/components/ui/app-ui/panel";
 import { useEffect, useState } from "react";
 import {

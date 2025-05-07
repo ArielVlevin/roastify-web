@@ -2,6 +2,7 @@ import type React from "react";
 import type { CrackStatus } from "@/lib/types";
 import StatPanel from "@/components/ui/app-ui/statPanel";
 import { JSX } from "react";
+import { usePreferencesStore } from "@/lib/store/preferencesStore";
 
 /**
  * Renders the crack status UI based on boolean values.
@@ -37,8 +38,6 @@ interface RoastStatsProps {
   temperature: number;
   roastStage: string;
   crackStatus: CrackStatus;
-  temperatureUnit: "F" | "C";
-  formatTemperature: (tempF: number) => string;
   formatTime: (timeInSeconds: number) => string;
 }
 
@@ -47,9 +46,11 @@ const RoastStats: React.FC<RoastStatsProps> = ({
   temperature,
   roastStage,
   crackStatus,
-  formatTemperature,
   formatTime,
 }) => {
+  const formatTemperature = usePreferencesStore(
+    (state) => state.formatTemperature
+  );
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
       <StatPanel label="Time">{formatTime(time)} </StatPanel>

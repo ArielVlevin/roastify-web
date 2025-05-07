@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import useRoaster from "@/hooks/useRoaster";
+import useRoaster from "@/lib/hooks/useRoaster";
 import SaveRoastForm from "@/components/roaster/handleSaveRoastForm";
 import { useRouter } from "next/navigation";
 
@@ -37,10 +37,6 @@ export default function RoastPage() {
     showRestorePrompt,
     restoreSession,
     declineRestore,
-    temperatureUnit,
-    toggleTemperatureUnit,
-    getDisplayTemperature,
-    formatTemperature,
     formatTime,
   } = useRoaster();
 
@@ -100,7 +96,6 @@ export default function RoastPage() {
         time={time}
         temperature={temperature}
         selectedProfile={selectedProfile}
-        temperatureUnit={temperatureUnit}
         markers={markers}
         temperatureData={temperatureData}
         isRoasting={isRoasting}
@@ -109,9 +104,6 @@ export default function RoastPage() {
         notification={notification}
         completed={completed}
         addMarker={addMarker}
-        getDisplayTemperature={getDisplayTemperature}
-        toggleTemperatureUnit={toggleTemperatureUnit}
-        formatTemperature={formatTemperature}
         formatTime={formatTime}
         removeMarker={removeMarker}
       />

@@ -1,22 +1,26 @@
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Coffee, ArrowRight } from "lucide-react";
-import { useRoastContext } from "@/context/RoastContext";
+import { useRoastStore } from "@/lib/store/roastStore";
 import { getTimeAgo } from "@/lib/converte";
 
 export const ActiveRoastAlert: React.FC = () => {
-  const { hasActiveRoast, profileName, lastUpdated } = useRoastContext();
+  // שימוש בסלקטורים של Zustand במקום useRoastContext
+  const isRoasting = useRoastStore((state) => state.isRoasting);
+  const selectedProfile = useRoastStore((state) => state.selectedProfile);
+  const startTime = useRoastStore((state) => state.startTime);
+
   const router = useRouter();
 
-  // check if we are on the roast page
+  // בדיקה אם אנחנו בדף הקלייה
   const pathname = usePathname();
   const isRoastPage = pathname?.includes("/roast");
 
-  // if there is no active roast or we are on the roast page, don't show the alert
-  if (!hasActiveRoast || isRoastPage) return null;
+  // אם אין קלייה פעילה או שאנחנו בדף הקלייה, לא להציג את ההתראה
+  if (!isRoasting || isRoastPage) return null;
 
-  // if there is an active roast, show the alert
-  const timeAgo = lastUpdated ? getTimeAgo(lastUpdated) : "";
+  // אם יש קלייה פעילה, הצג את ההתראה
+  const timeAgo = startTime ? getTimeAgo(startTime) : "";
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -27,7 +31,7 @@ export const ActiveRoastAlert: React.FC = () => {
         <div className="flex-1">
           <h3 className="font-bold">Roast In Progress</h3>
           <p className="text-sm">
-            {profileName} profile {timeAgo && `(${timeAgo})`}
+            {selectedProfile.name} profile {timeAgo && `(${timeAgo})`}
           </p>
         </div>
         <button

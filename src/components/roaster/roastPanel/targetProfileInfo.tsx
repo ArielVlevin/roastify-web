@@ -1,16 +1,18 @@
+import { usePreferencesStore } from "@/lib/store/preferencesStore";
 import { RoastProfile } from "@/lib/types";
 
 interface TargetProfileInfoProps {
   selectedProfile: RoastProfile;
-  formatTemperature: (temp: number) => string;
   formatTime: (time: number) => string;
 }
 
 const TargetProfileInfo = ({
   selectedProfile,
-  formatTemperature,
   formatTime,
 }: TargetProfileInfoProps) => {
+  const formatTemperature = usePreferencesStore(
+    (state) => state.formatTemperature
+  );
   return (
     <div className="mt-2 p-3 bg-muted/30 rounded-lg border border-border mb-4">
       <div className="flex flex-col sm:flex-row justify-between text-sm">

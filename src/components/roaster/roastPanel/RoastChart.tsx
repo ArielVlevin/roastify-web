@@ -3,6 +3,12 @@
 import type React from "react";
 import { useMemo } from "react";
 import {
+  Tooltip as ReactTooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import {
   LineChart,
   Line,
   XAxis,
@@ -11,16 +17,20 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceDot,
 } from "recharts";
-import type { RoastMarker, TemperaturePoint } from "@/lib/types";
+import type { MarkerIcon, RoastMarker, TemperaturePoint } from "@/lib/types";
 import { usePreferencesStore } from "@/lib/store/preferencesStore";
+import * as Icons from "lucide-react";
+
+import { Customized } from "recharts";
 
 interface RoastChartProps {
   data: TemperaturePoint[];
   targetTemperature?: number;
   time: number;
   markers?: RoastMarker[];
+
+  referenceData?: TemperaturePoint[];
 }
 
 const RoastChart: React.FC<RoastChartProps> = ({
@@ -28,6 +38,8 @@ const RoastChart: React.FC<RoastChartProps> = ({
   targetTemperature,
   time,
   markers = [],
+
+  referenceData,
 }) => {
   const formatTemperature = usePreferencesStore(
     (state) => state.formatTemperature
@@ -42,14 +54,54 @@ const RoastChart: React.FC<RoastChartProps> = ({
   }, [data]);
 
   const formatTooltip = (value: number, name: string) => {
-    if (name === "Current Temp") {
-      return [formatTemperature(value), name];
-    }
+    if (name === "Current Temp") return [formatTemperature(value), name];
+
     return [value, name];
   };
 
-  // הגדרת תחום ציר ה-Y בהתאם ליחידת הטמפרטורה
-  const yAxisDomain = temperatureUnit === "F" ? [0, 500] : [0, 260];
+  const yAxisDomain = temperatureUnit === "F" ? [0, 500] : [0, 300];
+
+  const MarkerIconsLayer: React.FC<any> = ({ xAxisMap, yAxisMap }) => {
+    const xScale = Object.values(xAxisMap)[0]?.scale;
+    const yScale = Object.values(yAxisMap)[0]?.scale;
+
+    if (!xScale || !yScale) return null;
+
+    return (
+      <>
+        {markers.map((marker) => {
+          const Icon: MarkerIcon = marker.icon || "Bookmark";
+          const IconComp = Icons[Icon];
+
+          const x = xScale(marker.time);
+          const y = yScale(marker.temperature);
+
+          if (x === undefined || y === undefined) return null;
+
+          return (
+            <ReactTooltip key={marker.id}>
+              <TooltipTrigger asChild>
+                <g
+                  key={marker.id}
+                  transform={`translate(${x - 10}, ${y - 12})`}
+                >
+                  <IconComp
+                    r={8}
+                    fill={marker.color || "#333"}
+                    className="stroke dark:stroke-white/70 stroke-gray-200 cursor-pointer"
+                    strokeWidth={1}
+                  />
+                </g>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-white">
+                {marker.label}
+              </TooltipContent>
+            </ReactTooltip>
+          );
+        })}
+      </>
+    );
+  };
 
   return (
     <div className="h-64 sm:h-72 md:h-80">
@@ -59,6 +111,7 @@ const RoastChart: React.FC<RoastChartProps> = ({
           margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+
           <XAxis
             dataKey="time"
             label={{
@@ -87,6 +140,19 @@ const RoastChart: React.FC<RoastChartProps> = ({
             }}
           />
           <Legend />
+
+          {referenceData && referenceData.length > 0 && (
+            <Line
+              data={referenceData}
+              dataKey="temperature"
+              stroke="var(--muted-foreground)"
+              strokeDasharray="4 4"
+              name="Previous Roast"
+              strokeWidth={1.5}
+              dot={false}
+            />
+          )}
+
           <Line
             type="monotone"
             dataKey="temperature"
@@ -96,8 +162,7 @@ const RoastChart: React.FC<RoastChartProps> = ({
             activeDot={{ r: 8 }}
             name="Current Temp"
           />
-
-          {/* קו לטמפרטורת המטרה */}
+          {/* target temperature line */}
           {time > 0 && targetTemperature && (
             <Line
               type="monotone"
@@ -110,28 +175,7 @@ const RoastChart: React.FC<RoastChartProps> = ({
             />
           )}
 
-          {/* נקודות סימון */}
-          {markers.map((marker) => {
-            const matchingDataPoint = convertedData.find(
-              (point) => point.time === marker.time
-            ) || {
-              time: marker.time,
-              temperature: marker.temperature,
-            };
-
-            return (
-              <ReferenceDot
-                key={marker.id}
-                x={matchingDataPoint.time}
-                y={matchingDataPoint.temperature}
-                r={6}
-                fill={marker.color || "#333"}
-                stroke="white"
-                strokeWidth={2}
-                label={{ value: marker.label, position: "top" }}
-              />
-            );
-          })}
+          <Customized component={MarkerIconsLayer} />
         </LineChart>
       </ResponsiveContainer>
     </div>

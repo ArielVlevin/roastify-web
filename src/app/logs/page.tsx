@@ -23,9 +23,6 @@ export default function LogsPage() {
       try {
         setIsLoading(true);
         const fetchedLogs = await api.getRoastLogs();
-
-        console.log("logs: ", fetchedLogs);
-
         setLogs(fetchedLogs);
         setError(null);
       } catch (err) {
@@ -51,7 +48,7 @@ export default function LogsPage() {
     : logs;
 
   const handleSelectLog = (log: RoastLog) => {
-    router.push(`/logs/${log.id}`);
+    router.push(`/roast?id=${log.id}`);
   };
 
   return (

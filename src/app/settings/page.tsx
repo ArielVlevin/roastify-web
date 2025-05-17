@@ -150,7 +150,7 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             onClick={() => router.back()}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 cursor-pointer"
           >
             <ArrowLeft size={18} /> <span>Back</span>
           </Button>
@@ -158,7 +158,7 @@ export default function SettingsPage() {
           <Button
             onClick={saveSettings}
             variant={hasChanges ? "default" : "outline"}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 cursor-pointer"
           >
             <Save size={18} /> <span>Save Changes</span>
           </Button>
@@ -186,7 +186,10 @@ export default function SettingsPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="ml-auto capitalize">
+                    <Button
+                      variant="outline"
+                      className="ml-auto capitalize cursor-pointer data-[state=open]:bg-primary data-[state=open]:text-white dark:data-[state=open]:border-muted-foreground data-[state=open]:border-2"
+                    >
                       {setting.value}
                     </Button>
                   </DropdownMenuTrigger>
@@ -222,7 +225,7 @@ export default function SettingsPage() {
           <Button
             onClick={resetSettings}
             variant="outline"
-            className="flex items-center gap-2"
+            className="cursor-pointer flex items-center gap-2"
           >
             <RotateCw className="h-4 w-4" /> Reset to Defaults
           </Button>

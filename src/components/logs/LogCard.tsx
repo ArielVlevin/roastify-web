@@ -44,7 +44,7 @@ const LogCard: React.FC<LogCardProps> = ({ log, onClick }) => {
           </div>
           <div className="flex items-center gap-1">
             <Clock size={14} />
-            <span>{log.timestamp.toFixed(1)} min</span>
+            <span>{(log.timestamp ?? 0).toFixed(1)} min</span>{" "}
           </div>
         </div>
       </CardHeader>
@@ -75,12 +75,12 @@ const LogCard: React.FC<LogCardProps> = ({ log, onClick }) => {
           {log.profile.name}
         </Badge>
         <div className="flex items-center gap-1">
-          {log.crack_status.first && (
+          {log.crack_status?.first && (
             <Badge variant="outline" className="bg-accent/10 text-accent">
               1st Crack
             </Badge>
           )}
-          {log.crack_status.second && (
+          {log.crack_status?.second && (
             <Badge
               variant="outline"
               className="bg-destructive/10 text-destructive"

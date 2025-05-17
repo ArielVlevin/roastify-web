@@ -8,6 +8,7 @@ import {
   PROFILES,
   RoastMarker,
   TemperaturePoint,
+  Marker,
 } from "@/lib/types";
 
 // Maximum roast duration in seconds (15 minutes = 900 seconds)
@@ -22,7 +23,7 @@ interface RoastState {
   temperature: number;
   temperatureData: TemperaturePoint[];
   roastStage: string;
-  crackStatus: CrackStatus;
+  crack_status: CrackStatus;
   notification: NotificationType | null;
   completed: boolean;
   firstCrackTime: number | null;
@@ -66,7 +67,7 @@ interface RoastState {
   setMarkers: (
     markers: RoastMarker[] | ((prev: RoastMarker[]) => RoastMarker[])
   ) => void;
-  addMarker: (label: string, color?: string, notes?: string) => void;
+  addMarker: (marker: Marker) => void;
   removeMarker: (markerId: string) => void;
   clearMarkers: () => void;
 
@@ -84,7 +85,7 @@ export const useRoastStore = create<RoastState>()(
       temperature: 24, // Starting room temperature
       temperatureData: [],
       roastStage: "Green",
-      crackStatus: { first: false, second: false },
+      crack_status: { first: false, second: false },
       notification: null,
       completed: false,
       firstCrackTime: null,
@@ -109,7 +110,7 @@ export const useRoastStore = create<RoastState>()(
           return { temperatureData };
         }),
       setRoastStage: (roastStage) => set({ roastStage }),
-      setCrackStatus: (crackStatus) => set({ crackStatus }),
+      setCrackStatus: (crack_status) => set({ crack_status }),
       setNotification: (notification) => set({ notification }),
       setCompleted: (completed) => set({ completed }),
       setFirstCrackTime: (firstCrackTime) => set({ firstCrackTime }),
@@ -133,7 +134,7 @@ export const useRoastStore = create<RoastState>()(
       },
 
       // Markers management
-      addMarker: (label, color = "#333333", notes = "") => {
+      addMarker: ({ label, color = "#333333", icon }) => {
         const state = get();
         if (!state.isRoasting && state.temperatureData.length === 0) return;
 
@@ -146,7 +147,8 @@ export const useRoastStore = create<RoastState>()(
           time: currentTime,
           temperature: currentTemp,
           label,
-          notes,
+          notes: "",
+          icon,
           color,
         };
 
@@ -175,7 +177,7 @@ export const useRoastStore = create<RoastState>()(
               isRoasting: state.isRoasting,
               startTime: state.startTime,
               temperatureData: state.temperatureData,
-              crackStatus: state.crackStatus,
+              crack_status: state.crack_status,
               firstCrackTime: state.firstCrackTime,
               secondCrackTime: state.secondCrackTime,
               completed: state.completed,

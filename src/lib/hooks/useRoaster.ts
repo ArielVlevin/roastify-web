@@ -164,6 +164,7 @@ export default function useRoaster() {
           profile: roastStore.selectedProfile.name,
           notes,
           markers: roastStore.markers,
+          crack_status: roastStore.crack_status,
         });
 
         console.log("\nSaved roast:\n", success);

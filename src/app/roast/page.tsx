@@ -3,14 +3,23 @@
 import { useEffect, useState } from "react";
 import useRoaster from "@/lib/hooks/useRoaster";
 import SaveRoastForm from "@/components/roaster/handleSaveRoastForm";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import RoastPanel from "@/components/roaster/roastPanel";
 import RoastLayout from "@/app/roast/RoastLayout";
 import RoastControls from "@/components/roaster/roastControlPanel";
 import RestoreSessionPrompt from "@/components/roaster/restoreSessionPrompt";
+import { TemperaturePoint } from "@/lib/types";
+import * as api from "@/lib/api";
 
 export default function RoastPage() {
+  const searchParams = useSearchParams();
+  const referenceRoastId = searchParams.get("id");
+
+  const [referenceData, setReferenceData] = useState<
+    TemperaturePoint[] | undefined
+  >(undefined);
+
   const router = useRouter();
 
   const [showSaveForm, setShowSaveForm] = useState<boolean>(false);
@@ -22,7 +31,7 @@ export default function RoastPage() {
     temperature,
     temperatureData,
     roastStage,
-    crackStatus,
+    crack_status,
     notification,
     completed,
     markers,
@@ -33,6 +42,10 @@ export default function RoastPage() {
     resetRoast,
     selectProfile,
     saveRoastData,
+    setCrackStatus,
+    setSecondCrackTime,
+    setFirstCrackTime,
+
     profiles,
     showRestorePrompt,
     restoreSession,
@@ -72,6 +85,17 @@ export default function RoastPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isRoasting]);
 
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (!referenceRoastId) return;
+      const log = await api.getRoastLog(referenceRoastId);
+      console.log("data: ", log.data);
+      setReferenceData(log.data);
+      console.log("referenceData: ", referenceData);
+    };
+    if (referenceRoastId) fetchLogs();
+  }, [referenceRoastId]);
+
   return (
     <RoastLayout
       temperatureData={temperatureData}
@@ -98,14 +122,18 @@ export default function RoastPage() {
         selectedProfile={selectedProfile}
         markers={markers}
         temperatureData={temperatureData}
+        referenceData={referenceData}
         isRoasting={isRoasting}
         roastStage={roastStage}
-        crackStatus={crackStatus}
+        crackStatus={crack_status}
         notification={notification}
         completed={completed}
         addMarker={addMarker}
         formatTime={formatTime}
         removeMarker={removeMarker}
+        setCrackStatus={setCrackStatus}
+        setFirstCrackTime={setFirstCrackTime}
+        setSecondCrackTime={setSecondCrackTime}
       />
 
       {/* Restore Session Prompt */}

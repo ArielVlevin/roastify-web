@@ -55,7 +55,10 @@ export default function ColorThemeCard({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto capitalize">
+                <Button
+                  variant="outline"
+                  className="ml-auto capitalize cursor-pointer data-[state=open]:bg-primary data-[state=open]:text-white dark:data-[state=open]:border-muted-foreground data-[state=open]:border-2"
+                >
                   {colorTheme || "Default"}
                 </Button>
               </DropdownMenuTrigger>

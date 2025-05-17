@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import * as api from "@/lib/api";
 import { useRoastStore } from "@/lib/store/roastStore";
-import { RoastMarker } from "@/lib/types";
+import { CrackStatus, RoastMarker } from "@/lib/types";
 import { useErrorStore } from "@/components/errorModal";
 
 // טיפוס למצב של API
@@ -28,6 +28,7 @@ interface ApiState {
     profile: string;
     notes?: string;
     markers: RoastMarker[];
+    crack_status: CrackStatus;
   }) => Promise<boolean>;
   checkForActiveRoast: () => Promise<void>;
 }
@@ -101,7 +102,7 @@ export const useApiStore = create<ApiState>()((set, get) => ({
         }
       }
 
-      // בדיקה אם הגענו לזמן מקסימלי
+      // Check if the roast has reached its maximum duration
       if (elapsedTime >= roastStore.MAX_DURATION) {
         await get().pauseRoastProcess();
         roastStore.setNotification({
@@ -125,7 +126,7 @@ export const useApiStore = create<ApiState>()((set, get) => ({
     }
   },
 
-  // התחלת תהליך קלייה בשרת
+  // star tRoast Process in backend
   startRoastProcess: async () => {
     const roastStore = useRoastStore.getState();
 
@@ -151,7 +152,6 @@ export const useApiStore = create<ApiState>()((set, get) => ({
     }
   },
 
-  // השהיית תהליך הקלייה בשרת
   pauseRoastProcess: async () => {
     try {
       set({ isLoading: true, error: null });
@@ -209,7 +209,7 @@ export const useApiStore = create<ApiState>()((set, get) => ({
         is_roasting: roastStore.isRoasting,
         data: roastStore.temperatureData,
         start_time: roastStore.startTime,
-        crack_status: roastStore.crackStatus,
+        crack_status: roastStore.crack_status,
       });
 
       set({ isLoading: false, lastSyncTime: Date.now() });

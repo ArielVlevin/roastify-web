@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useRoastStore } from "@/lib/store/roastStore";
 import { useApiStore } from "@/lib/store/apiStore";
-import { PROFILES } from "@/lib/types";
+import { BUILT_IN_PROFILES } from "@/lib/types";
 
 /**
  * Main hook for using the roast store with API integration
@@ -15,6 +15,11 @@ export default function useRoaster() {
   const roastStore = useRoastStore();
   const apiStore = useApiStore();
 
+  const allProfiles = [
+    ...roastStore.profiles,
+    //...roastStore.customProfiles,      // פרופילים שהמשתמש יצר
+    // ...roastStore.importedProfiles     // פרופילים שהובאו מלוגים
+  ];
   // Setup temperature fetch interval when roasting
   useEffect(() => {
     // Clear any existing interval when component using this hook mounts
@@ -82,13 +87,14 @@ export default function useRoaster() {
   // Helper to select a profile by name
   const selectProfile = useCallback(
     (profileName: string) => {
-      if (profileName === roastStore.selectedProfile.name) return;
+      if (profileName === roastStore.selectedProfile.name)
+        return console.log("Profile already selected");
 
-      const profile = PROFILES.find((p) => p.name === profileName);
+      const profile = allProfiles.find((p) => p.name === profileName);
       if (profile) roastStore.setSelectedProfile(profile);
       else console.warn(`Profile with name '${profileName}' not found`);
     },
-    [roastStore]
+    [allProfiles, roastStore]
   );
 
   // Start roast with API integration
@@ -144,7 +150,7 @@ export default function useRoaster() {
       roastStore.setCompleted(false);
       roastStore.setNotification(null);
       roastStore.setStartTime(0);
-      roastStore.setSelectedProfile(PROFILES[0]);
+      roastStore.setSelectedProfile(BUILT_IN_PROFILES[0]);
       roastStore.clearMarkers();
     } catch (error) {
       console.error("Failed to reset roast:", error);
@@ -167,7 +173,6 @@ export default function useRoaster() {
           crack_status: roastStore.crack_status,
         });
 
-        console.log("\nSaved roast:\n", success);
         await resetRoast();
 
         return success;
@@ -240,7 +245,7 @@ export default function useRoaster() {
     selectProfile,
 
     // Constants
-    profiles: PROFILES,
+    profiles: roastStore.profiles,
     maxDuration: roastStore.MAX_DURATION,
   };
 }

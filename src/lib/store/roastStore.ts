@@ -5,7 +5,7 @@ import {
   NotificationType,
   CrackStatus,
   RoastProfile,
-  PROFILES,
+  BUILT_IN_PROFILES,
   RoastMarker,
   TemperaturePoint,
   Marker,
@@ -71,6 +71,10 @@ interface RoastState {
   removeMarker: (markerId: string) => void;
   clearMarkers: () => void;
 
+  profiles: RoastProfile[];
+  setProfiles: (profiles: RoastProfile[]) => void;
+  addProfile: (profile: RoastProfile) => void;
+
   // Constants
   MAX_DURATION: number;
 }
@@ -81,7 +85,7 @@ export const useRoastStore = create<RoastState>()(
       // Initial state
       isRoasting: false,
       time: 0,
-      selectedProfile: PROFILES[0],
+      selectedProfile: BUILT_IN_PROFILES[0],
       temperature: 24, // Starting room temperature
       temperatureData: [],
       roastStage: "Green",
@@ -96,7 +100,14 @@ export const useRoastStore = create<RoastState>()(
       startTime: 0,
       MAX_DURATION,
 
+      profiles: [...BUILT_IN_PROFILES],
       // Basic setters
+      addProfile: (profile) =>
+        set((state) => {
+          if (state.profiles.some((p) => p.name === profile.name)) return state;
+          return { profiles: [...state.profiles, profile] };
+        }),
+      setProfiles: (profiles) => set({ profiles }),
       setIsRoasting: (isRoasting) => set({ isRoasting }),
       setTime: (time) => set({ time }),
       setSelectedProfile: (selectedProfile: RoastProfile) =>
@@ -170,6 +181,7 @@ export const useRoastStore = create<RoastState>()(
       // Don't persist everything to avoid localStorage bloat
       partialize: (state) => ({
         selectedProfile: state.selectedProfile,
+        profiles: state.profiles,
 
         // Only include these when there's an active roast
         ...(state.isRoasting || state.temperatureData.length > 0

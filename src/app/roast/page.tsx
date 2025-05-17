@@ -45,7 +45,7 @@ export default function RoastPage() {
     setCrackStatus,
     setSecondCrackTime,
     setFirstCrackTime,
-
+    addProfile,
     profiles,
     showRestorePrompt,
     restoreSession,
@@ -112,6 +112,9 @@ export default function RoastPage() {
         onResetRoast={resetRoast}
         onSelectProfile={selectProfile}
         time={time}
+        createNewProfile={addProfile}
+        importedProfiles={[]}
+        onImportProfile={addProfile}
       />
 
       {/* Right Panel: Real-time Data */}

@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
-// ייבוא של ה-store במקום ה-hooks הישנים
 import { usePreferencesStore } from "@/lib/store/preferencesStore";
 
 import { Button } from "@/components/ui/button";
@@ -176,7 +175,7 @@ export default function SettingsPage() {
             <Title className="flex items-center gap-2">
               {setting.icon} {setting.title}
             </Title>
-            <SubPanel className="p-8 flex flex-col ">
+            <SubPanel className="p-8 flex flex-col   bg-gradient-to-l from-muted-light via-muted to-background/80 animate-fade-in">
               <div className="flex items-center justify-between gap-16">
                 <div className="space-y-1">
                   <p className="text-sm font-medium leading-none">Current</p>
@@ -195,7 +194,7 @@ export default function SettingsPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="bg-background/40 backdrop-blur-sm"
+                    className="bg-primary-dark/10 backdrop-blur-sm"
                   >
                     <DropdownMenuLabel>{setting.title}</DropdownMenuLabel>
                     <DropdownMenuSeparator />

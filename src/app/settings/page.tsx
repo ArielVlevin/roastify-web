@@ -11,6 +11,10 @@ import {
   Save,
   RotateCw,
   Check,
+  Coffee,
+  Leaf,
+  Cherry,
+  Palette,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -28,8 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Panel, SubPanel } from "@/components/ui/app-ui/panel";
-import { useColorTheme } from "@/components/theme/theme-provider";
-import ColorThemeCard from "./colorThemeCard";
+import { ColorTheme, useColorTheme } from "@/components/theme/theme-provider";
 import Title from "@/components/ui/app-ui/title";
 
 export default function SettingsPage() {
@@ -37,7 +40,6 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const { colorTheme, setColorTheme } = useColorTheme();
 
-  // שימוש ב-Zustand במקום ב-hooks הישנים
   const temperatureUnit = usePreferencesStore((state) => state.temperatureUnit);
   const toggleTemperatureUnit = usePreferencesStore(
     (state) => state.toggleTemperatureUnit
@@ -91,6 +93,19 @@ export default function SettingsPage() {
     );
   }
 
+  const getColorThemeIcon = (theme: ColorTheme) => {
+    switch (theme) {
+      case "coffee":
+        return <Coffee className="h-5 w-5" />;
+      case "mint":
+        return <Leaf className="h-5 w-5" />;
+      case "berry":
+        return <Cherry className="h-5 w-5" />;
+      default:
+        return <Palette className="h-5 w-5" />;
+    }
+  };
+
   const settings = [
     {
       key: "temperatureUnit",
@@ -99,8 +114,8 @@ export default function SettingsPage() {
       description: "Change how temperatures are displayed throughout the app",
       value: temperatureUnit === "F" ? "Fahrenheit (°F)" : "Celsius (°C)",
       options: [
-        { value: "F", label: "Fahrenheit (°F)" },
-        { value: "C", label: "Celsius (°C)" },
+        { value: "F", label: "Fahrenheit (°F)", icon: <Thermometer /> },
+        { value: "C", label: "Celsius (°C)", icon: <Thermometer /> },
       ],
       currentValue: temperatureUnit,
       onChange: (v: string) => {
@@ -139,6 +154,37 @@ export default function SettingsPage() {
       ],
       currentValue: theme,
       onChange: setTheme,
+    },
+    {
+      key: "colorTheme",
+      icon: getColorThemeIcon(colorTheme),
+      title: "Color Theme",
+      description: "Choose a color scheme for the application",
+      value: colorTheme,
+      options: [
+        {
+          value: "default",
+          label: "Default",
+          icon: <Palette className="mr-2 h-4 w-4" />,
+        },
+        {
+          value: "coffee",
+          label: "Coffee",
+          icon: <Coffee className="mr-2 h-4 w-4" />,
+        },
+        {
+          value: "mint",
+          label: "Mint",
+          icon: <Leaf className="mr-2 h-4 w-4" />,
+        },
+        {
+          value: "berry",
+          label: "Berry",
+          icon: <Cherry className="mr-2 h-4 w-4" />,
+        },
+      ],
+      currentValue: colorTheme,
+      onChange: (v: string) => setColorTheme(v as ColorTheme),
     },
   ];
 
@@ -189,7 +235,7 @@ export default function SettingsPage() {
                       variant="outline"
                       className="ml-auto capitalize cursor-pointer data-[state=open]:bg-primary data-[state=open]:text-white dark:data-[state=open]:border-muted-foreground data-[state=open]:border-2"
                     >
-                      {setting.value}
+                      {setting.icon} {setting.value}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
@@ -217,8 +263,6 @@ export default function SettingsPage() {
             </SubPanel>
           </div>
         ))}
-
-        <ColorThemeCard colorTheme={colorTheme} setColorTheme={setColorTheme} />
 
         <div className="flex justify-center mt-4">
           <Button

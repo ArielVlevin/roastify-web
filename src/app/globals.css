@@ -1,6 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: "Rubik";
+  src: url("/fonts/Rubik/Rubik-VariableFont_wght.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Varela Round";
+  src: url("/fonts/Varela_Round/VarelaRound-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -37,6 +49,10 @@
   --radius-md: 0.5rem;
   --radius-lg: 0.625rem;
   --radius-xl: 0.75rem;
+
+  --font-heading: "Rubik", sans-serif;
+  --font-body: "Varela Round", sans-serif;
+  --font-display: "Cafe", "Varela Round", sans-serif;
 }
 
 :root {
@@ -321,6 +337,15 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
   }
 }
 

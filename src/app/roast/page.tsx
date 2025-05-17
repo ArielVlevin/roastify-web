@@ -113,7 +113,6 @@ export default function RoastPage() {
         onSelectProfile={selectProfile}
         time={time}
         createNewProfile={addProfile}
-        importedProfiles={[]}
         onImportProfile={addProfile}
       />
 

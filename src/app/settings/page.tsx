@@ -15,6 +15,7 @@ import {
   Leaf,
   Cherry,
   Palette,
+  MapPin,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -34,6 +35,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Panel, SubPanel } from "@/components/ui/app-ui/panel";
 import { ColorTheme, useColorTheme } from "@/components/theme/theme-provider";
 import Title from "@/components/ui/app-ui/title";
+import ManageMarkersDialog from "./markerDialog";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -221,7 +223,7 @@ export default function SettingsPage() {
             <Title className="flex items-center gap-2">
               {setting.icon} {setting.title}
             </Title>
-            <SubPanel className="p-8 flex flex-col   bg-gradient-to-l from-muted-light via-muted to-background/80 animate-fade-in">
+            <SubPanel className="p-8 flex flex-col   bg-primary-light/40 dark:bg-primary/30 backdrop-blur-sm animate-fade-in">
               <div className="flex items-center justify-between gap-16">
                 <div className="space-y-1">
                   <p className="text-sm font-medium leading-none">Current</p>
@@ -233,7 +235,8 @@ export default function SettingsPage() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="outline"
-                      className="ml-auto capitalize cursor-pointer data-[state=open]:bg-primary data-[state=open]:text-white dark:data-[state=open]:border-muted-foreground data-[state=open]:border-2"
+                      className="ml-auto capitalize cursor-pointer data-[state=open]:bg-primary data-[state=open]:text-white dark:data-[state=open]:border-muted-foreground data-[state=open]:border-2 dark:bg-white/30 
+                      dark:hover:bg-white/50 text-gray-600 hover:text-gray-700 dark:text-white bg-white/30 hover:bg-white/50 "
                     >
                       {setting.icon} {setting.value}
                     </Button>
@@ -242,8 +245,10 @@ export default function SettingsPage() {
                     align="end"
                     className="bg-primary-dark/10 backdrop-blur-sm"
                   >
-                    <DropdownMenuLabel>{setting.title}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel className="font-semibold">
+                      {setting.title}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-gray-300 dark:bg-gray-700" />
                     <DropdownMenuRadioGroup
                       value={setting.currentValue}
                       onValueChange={setting.onChange}
@@ -263,7 +268,24 @@ export default function SettingsPage() {
             </SubPanel>
           </div>
         ))}
-
+        <div>
+          <Title className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" /> Markers
+          </Title>
+          <SubPanel className="p-8 flex flex-col   bg-primary-light/40 dark:bg-primary/30 backdrop-blur-sm animate-fade-in">
+            <div className="flex items-center justify-between gap-16">
+              <div className="space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  Custom Markers
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Manage custom markers for your coffee roasting profiles
+                </p>
+              </div>
+              <ManageMarkersDialog />
+            </div>
+          </SubPanel>
+        </div>
         <div className="flex justify-center mt-4">
           <Button
             onClick={resetSettings}

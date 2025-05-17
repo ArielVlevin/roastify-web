@@ -1,4 +1,4 @@
-import { NotificationType } from "@/lib/types";
+import { NotificationType } from "@/lib/types/____types";
 
 const RoastNotifications = ({
   notification,

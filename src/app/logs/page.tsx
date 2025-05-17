@@ -23,6 +23,9 @@ export default function LogsPage() {
       try {
         setIsLoading(true);
         const fetchedLogs = await api.getRoastLogs();
+
+        console.log("logs: ", fetchedLogs);
+
         setLogs(fetchedLogs);
         setError(null);
       } catch (err) {
@@ -41,7 +44,7 @@ export default function LogsPage() {
     ? logs.filter(
         (log) =>
           log.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          log.profile.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          //log.profile.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (log.notes &&
             log.notes.toLowerCase().includes(searchTerm.toLowerCase()))
       )

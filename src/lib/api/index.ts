@@ -1,8 +1,3 @@
-// Main export file - re-exports all API functions
-// Re-export types and base utilities
-export { API_URL } from "@/lib/api/base";
-export type { ApiError } from "@/lib/api/base";
-
 // Re-export temperature functions
 export {
   getTemperature,
@@ -17,7 +12,6 @@ export {
   pauseRoast,
   resetRoast,
   forceResetRoast,
-  setHeatLevel,
 } from "@/lib/api/control";
 
 // Re-export data functions

@@ -59,7 +59,10 @@ export default function ColorThemeCard({
                   {colorTheme || "Default"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent
+                align="end"
+                className="bg-background/40 backdrop-blur-sm"
+              >
                 <DropdownMenuLabel>Color Themes</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuRadioGroup

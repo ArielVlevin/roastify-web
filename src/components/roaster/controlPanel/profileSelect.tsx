@@ -31,7 +31,7 @@ const ProfileSelect = ({
       <SelectTrigger id="profile-select" className={className}>
         <SelectValue placeholder="Select a profile" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-background/40 backdrop-blur-sm">
         {profiles.map((profile) => (
           <SelectItem key={profile.name} value={profile.name}>
             {profile.name}

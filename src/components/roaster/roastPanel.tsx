@@ -11,7 +11,7 @@ import {
   NotificationType,
   RoastMarker,
   RoastProfile,
-  TemperatureData,
+  TemperaturePoint,
 } from "@/lib/types";
 import RoastNotifications from "@/components/roaster/roastPanel/roastNotifications";
 
@@ -20,7 +20,7 @@ interface RoastPanelProps {
   temperature: number;
   selectedProfile: RoastProfile;
   markers: RoastMarker[];
-  temperatureData: TemperatureData[];
+  temperatureData: TemperaturePoint[];
   isRoasting: boolean;
   roastStage: string;
   crackStatus: CrackStatus;

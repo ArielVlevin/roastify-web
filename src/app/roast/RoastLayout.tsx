@@ -1,15 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { TemperatureData } from "@/lib/types";
+import { TemperaturePoint } from "@/lib/types";
 import { Coffee, Save } from "lucide-react";
 
 interface RoastLayoutProps {
   children: React.ReactNode;
-  temperatureData: TemperatureData[];
+  temperatureData: TemperaturePoint[];
   handleSaveClick: () => void;
   onGoHome: () => void;
 }
 interface HeaderProps {
-  temperatureData: TemperatureData[];
+  temperatureData: TemperaturePoint[];
   handleSaveClick: () => void;
   onGoHome: () => void;
 }
@@ -53,7 +53,7 @@ const Header = ({
         <Button
           onClick={handleSaveClick}
           disabled={temperatureData && temperatureData.length === 0}
-          className="flex items-center gap-1 bg-primary hover:bg-primary-dark text-primary-foreground py-2 px-3 sm:px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+          className="cursor-pointer flex items-center gap-1 bg-primary hover:bg-primary-dark text-primary-foreground py-2 px-3 sm:px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
         >
           <Save size={16} /> Save Roast
         </Button>

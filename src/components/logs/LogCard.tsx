@@ -3,7 +3,6 @@
 import type React from "react";
 import { Calendar, Clock } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import type { RoastLog } from "@/lib/types";
 import {
   Card,
   CardContent,
@@ -12,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { RoastLog } from "@/lib/types";
 
 interface LogCardProps {
   log: RoastLog;
@@ -44,7 +44,7 @@ const LogCard: React.FC<LogCardProps> = ({ log, onClick }) => {
           </div>
           <div className="flex items-center gap-1">
             <Clock size={14} />
-            <span>{log.duration.toFixed(1)} min</span>
+            <span>{log.timestamp.toFixed(1)} min</span>
           </div>
         </div>
       </CardHeader>
@@ -53,7 +53,7 @@ const LogCard: React.FC<LogCardProps> = ({ log, onClick }) => {
         <div className="h-32 bg-muted/10 px-1">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={log.tempData}
+              data={log.data}
               margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
             >
               <XAxis dataKey="time" tick={false} />
@@ -72,15 +72,15 @@ const LogCard: React.FC<LogCardProps> = ({ log, onClick }) => {
 
       <CardFooter className="flex justify-between items-center pt-3 pb-3">
         <Badge variant="outline" className="bg-muted/20 text-foreground">
-          {log.profile}
+          {log.profile.name}
         </Badge>
         <div className="flex items-center gap-1">
-          {log.firstCrack && (
+          {log.crack_status.first && (
             <Badge variant="outline" className="bg-accent/10 text-accent">
               1st Crack
             </Badge>
           )}
-          {log.secondCrack && (
+          {log.crack_status.second && (
             <Badge
               variant="outline"
               className="bg-destructive/10 text-destructive"

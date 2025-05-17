@@ -2,12 +2,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
-  TemperatureData,
   NotificationType,
   CrackStatus,
   RoastProfile,
   PROFILES,
   RoastMarker,
+  TemperaturePoint,
 } from "@/lib/types";
 
 // Maximum roast duration in seconds (15 minutes = 900 seconds)
@@ -20,7 +20,7 @@ interface RoastState {
   time: number;
   selectedProfile: RoastProfile;
   temperature: number;
-  temperatureData: TemperatureData[];
+  temperatureData: TemperaturePoint[];
   roastStage: string;
   crackStatus: CrackStatus;
   notification: NotificationType | null;
@@ -43,7 +43,9 @@ interface RoastState {
 
   setTemperature: (temp: number) => void;
   setTemperatureData: (
-    data: TemperatureData[] | ((prev: TemperatureData[]) => TemperatureData[])
+    data:
+      | TemperaturePoint[]
+      | ((prev: TemperaturePoint[]) => TemperaturePoint[])
   ) => void;
 
   setCrackStatus: (status: CrackStatus) => void;
@@ -78,7 +80,7 @@ export const useRoastStore = create<RoastState>()(
       // Initial state
       isRoasting: false,
       time: 0,
-      selectedProfile: PROFILES[0], // Default to Full City
+      selectedProfile: PROFILES[0],
       temperature: 24, // Starting room temperature
       temperatureData: [],
       roastStage: "Green",

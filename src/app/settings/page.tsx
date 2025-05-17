@@ -15,7 +15,7 @@ import {
 import { useTheme } from "next-themes";
 
 // ייבוא של ה-store במקום ה-hooks הישנים
-import { useRoastStore } from "@/lib/store/roastStore";
+import { usePreferencesStore } from "@/lib/store/preferencesStore";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,8 +39,8 @@ export default function SettingsPage() {
   const { colorTheme, setColorTheme } = useColorTheme();
 
   // שימוש ב-Zustand במקום ב-hooks הישנים
-  const temperatureUnit = useRoastStore((state) => state.temperatureUnit);
-  const toggleTemperatureUnit = useRoastStore(
+  const temperatureUnit = usePreferencesStore((state) => state.temperatureUnit);
+  const toggleTemperatureUnit = usePreferencesStore(
     (state) => state.toggleTemperatureUnit
   );
 
@@ -190,7 +190,10 @@ export default function SettingsPage() {
                       {setting.value}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-background/40 backdrop-blur-sm"
+                  >
                     <DropdownMenuLabel>{setting.title}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup

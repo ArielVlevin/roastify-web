@@ -1,11 +1,7 @@
 // Temperature related functions
 
-import {
-  API_URL,
-  CrackStatus,
-  createApiError,
-  TemperatureData,
-} from "@/lib/api/base";
+import { CrackStatus, createApiError, TemperaturePoint } from "@/lib/api/base";
+import { API_URL } from "@/lib/types/api";
 
 /**
  * Get the current temperature
@@ -68,7 +64,7 @@ export async function checkActiveRoast() {
  */
 export async function syncState(clientState: {
   is_roasting: boolean;
-  data: TemperatureData[];
+  data: TemperaturePoint[];
   start_time: number;
   crack_status?: CrackStatus;
 }) {

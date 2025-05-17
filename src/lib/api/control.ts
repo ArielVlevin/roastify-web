@@ -1,6 +1,7 @@
 // Roast control functions
 
-import { API_URL, createApiError } from "@/lib/api/base";
+import { createApiError } from "@/lib/api/base";
+import { API_URL } from "@/lib/types";
 
 /**
  * Start the roast process
@@ -17,7 +18,7 @@ export async function startRoast() {
         response.status
       );
     }
-
+    console.log("startRoast response: ", response);
     return await response.json();
   } catch (error) {
     console.error("Error starting roast:", error);
@@ -90,33 +91,6 @@ export async function forceResetRoast() {
     return await response.json();
   } catch (error) {
     console.error("Error force resetting roast:", error);
-    throw error;
-  }
-}
-
-/**
- * Set the heat level
- */
-export async function setHeatLevel(level: number) {
-  try {
-    const response = await fetch(`${API_URL}/heat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ level }),
-    });
-
-    if (!response.ok) {
-      throw createApiError(
-        `Failed to set heat level: ${response.status}`,
-        response.status
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error setting heat level:", error);
     throw error;
   }
 }

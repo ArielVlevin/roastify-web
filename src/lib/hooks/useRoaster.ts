@@ -163,9 +163,11 @@ export default function useRoaster() {
           name,
           profile: roastStore.selectedProfile.name,
           notes,
+          markers: roastStore.markers,
         });
 
-        if (!roastStore.isRoasting) await resetRoast();
+        console.log("\nSaved roast:\n", success);
+        await resetRoast();
 
         return success;
       } catch (error) {

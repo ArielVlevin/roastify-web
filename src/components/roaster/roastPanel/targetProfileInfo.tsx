@@ -1,5 +1,7 @@
-import { usePreferencesStore } from "@/lib/store/preferencesStore";
+"use client";
+
 import { RoastProfile } from "@/lib/types";
+import { useFormattedTemperature } from "@/lib/hooks/useFormattedTemperature";
 
 interface TargetProfileInfoProps {
   selectedProfile: RoastProfile;
@@ -10,16 +12,17 @@ const TargetProfileInfo = ({
   selectedProfile,
   formatTime,
 }: TargetProfileInfoProps) => {
-  const formatTemperature = usePreferencesStore(
-    (state) => state.formatTemperature
+  const formattedTemperature = useFormattedTemperature(
+    selectedProfile.targetTemp
   );
+
   return (
     <div className="mt-2 p-3 bg-muted/30 rounded-lg border border-border mb-4">
       <div className="flex flex-col sm:flex-row justify-between text-sm">
         <div className="mb-2 sm:mb-0">
           <span className="text-muted-foreground">Target Temperature:</span>
           <span className="ml-2 font-medium text-foreground">
-            {formatTemperature(selectedProfile.targetTemp)}
+            {formattedTemperature}
           </span>
         </div>
         <div>

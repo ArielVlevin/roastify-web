@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { AlertTriangle, Check, Info, X } from "lucide-react";
-import { NotificationType } from "@/lib/types";
+import { NotificationType } from "@/lib/types/____types";
 import { Button } from "@/components/ui/button";
 
 interface NotificationProps {

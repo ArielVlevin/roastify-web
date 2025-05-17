@@ -1,7 +1,9 @@
 // lib/store/apiStore.ts
 import { create } from "zustand";
 import * as api from "@/lib/api";
-import { useRoastStore } from "./roastStore";
+import { useRoastStore } from "@/lib/store/roastStore";
+import { RoastMarker } from "@/lib/types";
+import { useErrorStore } from "@/components/errorModal";
 
 // טיפוס למצב של API
 interface ApiState {
@@ -20,28 +22,31 @@ interface ApiState {
   startRoastProcess: () => Promise<void>;
   pauseRoastProcess: () => Promise<void>;
   resetRoastProcess: () => Promise<void>;
-  setHeatLevel: (level: number) => Promise<void>;
   syncWithServer: () => Promise<void>;
   saveRoastData: (data: {
     name: string;
     profile: string;
     notes?: string;
+    markers: RoastMarker[];
   }) => Promise<boolean>;
   checkForActiveRoast: () => Promise<void>;
 }
 
 export const useApiStore = create<ApiState>()((set, get) => ({
-  // מצב התחלתי
+  //state
   isLoading: false,
   error: null,
   lastSyncTime: null,
 
-  // פעולות בסיסיות
+  // base functions
   setIsLoading: (loading) => set({ isLoading: loading }),
-  setError: (error) => set({ error }),
+  setError: (error) => {
+    if (error)
+      useErrorStore.getState().showError("Failed to sync with server", error);
+    set({ error });
+  },
   clearError: () => set({ error: null }),
 
-  // שליפת טמפרטורה מהשרת
   fetchTemperature: async () => {
     const roastStore = useRoastStore.getState();
 
@@ -51,18 +56,18 @@ export const useApiStore = create<ApiState>()((set, get) => ({
       set({ isLoading: true, error: null });
       const tempData = await api.getTemperature();
 
-      // עדכון הטמפרטורה בstore
+      // update temperature in store
       roastStore.setTemperature(tempData.temperature);
 
-      // עדכון הזמן שעבר
+      // calculate elapsed time
       const elapsedTime =
         tempData.elapsed_time !== undefined
           ? tempData.elapsed_time
           : Math.floor((Date.now() - roastStore.startTime) / 1000);
-
+      // update time in store
       roastStore.setTime(elapsedTime);
 
-      // הוספת נקודת נתונים לגרף
+      // update points in store
       roastStore.setTemperatureData((prevData) => [
         ...prevData,
         {
@@ -73,11 +78,9 @@ export const useApiStore = create<ApiState>()((set, get) => ({
         },
       ]);
 
-      // עדכון סטטוס קראק אם נשלח מהשרת
       if (tempData.crack_status) {
         roastStore.setCrackStatus(tempData.crack_status);
 
-        // עדכון זמני קראק אם צריך
         if (tempData.crack_status.first && roastStore.firstCrackTime === null) {
           roastStore.setFirstCrackTime(elapsedTime);
           roastStore.setNotification({
@@ -194,24 +197,6 @@ export const useApiStore = create<ApiState>()((set, get) => ({
     }
   },
 
-  // הגדרת רמת חום בשרת
-  setHeatLevel: async (level) => {
-    try {
-      set({ isLoading: true, error: null });
-      const result = await api.setHeatLevel(level);
-      set({ isLoading: false });
-      return result;
-    } catch (error) {
-      console.error("Failed to set heat level:", error);
-      set({
-        isLoading: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-
-      throw error;
-    }
-  },
-
   // סנכרון עם השרת
   syncWithServer: async () => {
     const roastStore = useRoastStore.getState();
@@ -244,10 +229,12 @@ export const useApiStore = create<ApiState>()((set, get) => ({
   saveRoastData: async (data) => {
     const roastStore = useRoastStore.getState();
 
+    console.log("what user send when save: ", data);
     try {
       set({ isLoading: true, error: null });
-      await api.saveRoast(data);
+      const response = await api.saveRoast(data);
 
+      console.log(" Saved roast data:", response);
       set({ isLoading: false });
       roastStore.setNotification({
         type: "success",

@@ -13,11 +13,11 @@ import {
   ResponsiveContainer,
   ReferenceDot,
 } from "recharts";
-import type { RoastMarker, TemperatureData } from "@/lib/types";
+import type { RoastMarker, TemperaturePoint } from "@/lib/types";
 import { usePreferencesStore } from "@/lib/store/preferencesStore";
 
 interface RoastChartProps {
-  data: TemperatureData[];
+  data: TemperaturePoint[];
   targetTemperature?: number;
   time: number;
   markers?: RoastMarker[];

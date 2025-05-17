@@ -1,6 +1,7 @@
 // Roast data and log functions
 
-import { API_URL, createApiError } from "@/lib/api/base";
+import { API_URL, RoastMarker } from "@/lib/types";
+import { createApiError } from "@/lib/api/base";
 
 /**
  * Save roast data
@@ -10,6 +11,7 @@ export async function saveRoast(data: {
   profile: string;
   notes?: string;
   filename?: string;
+  markers: RoastMarker[];
 }) {
   try {
     const response = await fetch(`${API_URL}/save`, {
@@ -41,6 +43,7 @@ export async function getRoastLogs() {
   try {
     const response = await fetch(`${API_URL}/logs`);
 
+    console.log("getRoastLogs response: ", response);
     if (!response.ok) {
       throw createApiError(
         `Failed to fetch logs: ${response.status}`,
